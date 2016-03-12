@@ -1,0 +1,107 @@
+/transaction (discounts can be created here)
+  OPTIONS
+  /{ID};{ID}
+    GET transaction details
+  /{TYPE};{TYPE}?start&end
+    POST a new transaction
+    GET a list of transactions of certain types
+
+  Transaction should return links to: products and customer
+
+/user (clerks, applications)
+  POST a new user, requests username, password returns passphrase and user id
+  OPTIONS
+  /{ID}
+    GET a user's details
+    PUT updates to a user
+    DELETE a user
+  /{group}
+    GET users in a group
+    POST a new group
+    PUT updates to an existing group
+    DELETE a group
+  /search?name
+    GET a list of users by matching
+
+/customer (discounts can be created here)
+  POST a new customer
+  OPTIONS
+    /{ID};{/ID}
+      GET customer details
+      PUT updates to customer details
+      DELETE a customer
+    /{group}
+      GET customers in a group
+      POST a new group
+      PUT updates to an existing group
+      DELETE a group
+    /search?name
+      GET a list of customers by matching
+
+  Customer should return links to transactions
+
+/product (discounts can be created here)
+  POST a new product
+  OPTIONS
+  /upc/{UPC};{UPC}
+  /sku/{sku};{sku}
+  GET - gets data about product or products
+  PUT - create/modify a product
+  DELETE - removes a product
+  /search
+    ?name
+    ?manufacturer
+    ?sku
+    ?upc
+    GET data about products most closely matching the query
+
+  Product should return links to manufacturer
+
+/source (manufacturers and reps)
+  GET
+  OPTIONS
+  /manufacturer/{NAME};{NAME}
+  /rep/{NAME};{NAME}
+    GET
+    PUT
+    DELETE
+  /search?name
+    GET
+
+/report
+  OPTIONS
+  GET (links to reports)
+  ?q
+    GET
+  /name
+    GET
+    PUT
+    DELETE
+
+  Report should return all links
+
+All ends have a ?show and ?hide to adjust returned fields. ?show is exclusive, ?hide is inclusive.
+
+Rather than having an htaccess, just have index.phps and require the method file (GET, POST, etc.)
+Default to "not allowed"
+
+GET - retrieve data
+PUT - modify/create data. Idempotent (multiple requests don't make a change) (4x0 === 4x0x0)
+DELETE - remove data
+HEAD - get metadata without fetching the body
+OPTIONS - what methods am I allowed to do?
+POST - allow the server to put the data on the server where it wants to. Not idempotent (4x2 !== 4x2x2)
+
+Response times: 0.1 seconds offsite, 0.06 onsite.
+
+Authentication:
+Realms allow GET on each endpoint.
+Use self-signed https on each domain, basic authentication.
+Browser clients will have to visit the site in the browser and confirm the exception before using a client.
+Each user needs a public + secret password. Easily differentiated
+ID the user - public + secret
+Prevent tampering - public + non-transmitted secret (diceware word phrase)
+
+# https://github.com/digitalbazaar/forge
+http://stackoverflow.com/questions/5288150/is-digest-authentication-possible-with-jquery
+# http://stackoverflow.com/questions/5507234/how-to-use-basic-auth-with-jquery-and-ajax

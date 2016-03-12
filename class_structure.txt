@@ -1,0 +1,71 @@
+Parts of running an api:
+FLOW:
+a. request arrives at endpoint index.php
+b. index.php
+  1. requires endpoint Class
+  2. requires request
+  3. requires security
+  4. requires query
+  5. requires response
+  6. checks verb and requires METHOD.php, returns Method Not Allowed if not found.
+    i.    instantiates the request. The request object returns the targets and all details
+          a. request instantiates the security. The security model confirms the targets.
+    ii.   instantiates the endpoint.
+          a. the endpoint instantiates the query and populates itself
+    iv.   instantiates the response
+
+1. parse request
+2. security checks
+  a. check permissions
+    1. make mysql queries for user credentials
+      a. see if password matches
+      b. see if user has permissions for endpoint and method
+  b. see if message was tampered with
+    1. make sure request and method match
+    2. make sure hash from client matches hash from us
+  c. ensure the message is safe
+    1. check for bad things like mysql attacks
+    2. check for sanity
+    3. check for length
+3. turn the request into quer(y|ies)
+4. execute query
+  a. make query
+  b. retrieve results
+5. format results
+6. generate page
+  a. header
+  b. body
+7. return page
+
+request {
+  path
+  targets[]
+  scope[]
+  conditions[]
+  parse->
+}
+
+security {
+  user
+  path
+  method
+  check_security
+  _check_user
+  _check_tampering
+  _check_sanity
+  _check_permissions
+}
+
+query {
+  build_query
+  execute_query
+  fetch_result
+}
+
+response {
+  header
+  body
+  set_header->
+  set_body->
+  format_response->
+}

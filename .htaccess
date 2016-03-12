@@ -1,0 +1,9 @@
+# RewriteEngine On
+
+# RewriteCond %{REQUEST_FILENAME} !-f
+# RewriteRule ^(.*)/(.*)$ $1/%{REQUEST_METHOD}.php?$2 [QSA,L]
+
+
+<Files include.php>
+  Require all denied
+</Files>
