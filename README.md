@@ -133,6 +133,6 @@ Each user needs a public + secret password. Easily differentiated
 ID the user - public + secret
 Prevent tampering - public + non-transmitted secret (diceware word phrase)
 
-# https://github.com/digitalbazaar/forge
+https://github.com/digitalbazaar/forge
 http://stackoverflow.com/questions/5288150/is-digest-authentication-possible-with-jquery
-# http://stackoverflow.com/questions/5507234/how-to-use-basic-auth-with-jquery-and-ajax
+http://stackoverflow.com/questions/5507234/how-to-use-basic-auth-with-jquery-and-ajax
