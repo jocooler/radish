@@ -1,3 +1,34 @@
+Radish - the RESTful Api DrIven Sales Helper
+========================
+Radish seeks to be an open source, full-featured Point of Sale system and inventory tracker. This is the API side of the project.
+
+Currently, only the product endpoint works, but other endpoints should follow soon.
+
+By decoupling the database/API layer from the front end, we create a system designed to extend and integrate and "play nice" with other products. The aim of this project is to offer a variety of UIs and consumers for the API to make it easy to integrate with websites and existing tools.
+
+Key Features:
+* granular permissions at the user and group level
+* security for every request
+* designed to manage multiple stores and parts of the supply chain
+* designed to integrate with anything that can take programmatic input
+* designed to manage thousands of products, users, and locations
+* modular design to keep functioning even if connectivity is limited
+* RESTful and built for use with tools like AJAX and cURL.
+* free and open source
+
+Requirements:
+* PHP 5.5+
+* MySQL or compatible DB
+* currently testing on Apache, but hope to become server agnostic
+
+What follows is my rough planning outline of what the API will look like.
+
+Sample request and response:
+`GET https://example.com/api/product/sku/?2040&signature=123&timestamp=1368909000`
+
+`{"2040":{"category":"Infant","discountType":null,"discount":null,"manufacturer":"Rich Frog","name":"Squeak Easy - Puppy","qoh":null,"retail":6.99,"sku":"2040","taxable":false,"upc":"683981052437","wholesale":6.99}}`
+
+```
 /transaction (discounts can be created here)
   OPTIONS
   /{ID};{ID}
@@ -77,7 +108,7 @@
     GET
     PUT
     DELETE
-
+```
   Report should return all links
 
 All ends have a ?show and ?hide to adjust returned fields. ?show is exclusive, ?hide is inclusive.
