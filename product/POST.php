@@ -8,23 +8,37 @@ class Post_Product extends Product {
 
   public function fetch_details() {
     $this->set($this->body);
-    $post_query_parameters = array (
-      'sku'   => $this->sku,
-      'upc'   => $this->upc,
-      'name'  => $this->name,
-      'manufacturer'  => $this->manufacturer,
-      'category'      => $this->category,
-      'wholesale'     => $this->wholesale,
-      'taxable'       => $this->taxable,
-      'qoh'           => $this->qoh,
-      'retail'        => $this->retail,
-      'discount'      => $this->discount,
-      'discount_type' => $this->discount_type
-    );
+    $this->query = new Query($check_query_string, array('upc'=>$this->upc));
 
+    if ($this->query->result) { // TODO test This
+      // there already was a product
+      $response = new Response(409, array("error"=>"product already exists. Please try a PUT request to the UPC."));
+      die();
+    } else {
+
+      $max_query = new Query($max_query_string);
+      $max_query->execute(array());
+      $this->sku = $max_query->result;
+
+      $post_query_parameters = array (
+        'sku'   => $this->sku,
+        'upc'   => $this->upc,
+        'name'  => $this->name,
+        'manufacturer'  => $this->manufacturer,
+        'category'      => $this->category,
+        'wholesale'     => $this->wholesale,
+        'taxable'       => $this->taxable,
+        'qoh'           => $this->qoh,
+        'retail'        => $this->retail,
+        'discount'      => $this->discount,
+        'discount_type' => $this->discount_type
+      );
+
+      
+    }
   }
 }
 
-$request = new Request();
+$request = new Request(array(), array('signature', 'timestamp'), false);
 
 ?>
