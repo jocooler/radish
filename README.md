@@ -2,7 +2,13 @@ Radish - the RESTful Api DrIven Sales Helper
 ========================
 Radish seeks to be an open source, full-featured Point of Sale system and inventory tracker. This is the API side of the project.
 
-Currently, only the product endpoint works, but other endpoints should follow soon.
+Status:
+* /product is done except for search/GET and OPTIONS.
+
+Deck:
+* transaction/id/GET
+* transaction/type/POST
+* transaction/type/GET
 
 By decoupling the database/API layer from the front end, we create a system designed to extend and integrate and "play nice" with other products. The aim of this project is to offer a variety of UIs and consumers for the API to make it easy to integrate with websites and existing tools.
 
