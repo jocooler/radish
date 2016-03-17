@@ -1,10 +1,10 @@
 <?php
 class Security {
   public $allowed = false;
+  public $user;
+  public $user_id;
 
   private $request;
-  private $user;
-  private $user_id;
   private $password;
   private $secret;
   private $method;
@@ -101,7 +101,7 @@ class Security {
   }
 
   private function check_permissions() {
-    //TODO name this field...
+    //TODO redo this function
     $user_groups_template = 'SELECT group FROM users_to_groups WHERE user=:user_id';
     $groups_permissions_template = 'SELECT permission FROM permissions WHERE NAMETHISFIELD=:group_id AND type=group AND endpoint=:endpoint AND method=:method AND (target=:target OR target="all")';
     $user_permissions_template = 'SELECT permission FROM permissions WHERE NAMETHISFIELD=:user_id AND type=user AND endpoint=:endpoint AND method=:method AND (target=:target OR target="all")';

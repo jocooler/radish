@@ -7,8 +7,10 @@ class Transaction extends Endpoint {
   /* Endpoint specific variables */
   protected $transactionId;
   protected $transactionType;
-  protected $clerk;
-  protected $clerkId;
+  protected $transactionTypeId;
+  protected $transactionTypeEffect;
+  protected $user;
+  protected $userId;
   protected $customer;
   protected $customerId;
   protected $total;
@@ -19,6 +21,7 @@ class Transaction extends Endpoint {
   protected $paymentType;
 
   protected $products = array(); // array of Products, probably. product id, product name, quantity, regular price, special price
+  protected $product_skus = array(); //sku=>(discount=>'',discountType=>'')
 
   /* Template SQL Queries. These are for example only, please reimplement in each endpoint. */
   protected $query;
@@ -57,14 +60,71 @@ class Transaction extends Endpoint {
   protected $put_query_string = ''; // we aren't using PUT with transactions
   protected $delete_query_string = ''; // we aren't using DELETE with transactions
   protected $options_query_string = ''; //TODO
-  protected $accessible_fields = array('transactionId', 'transactionType', 'clerk', 'customer', 'total', 'time', 'discount', 'discountType', 'payment', 'products');
+  protected $accessible_fields = array('transactionId', 'transactionType', 'user', 'customer', 'total', 'time', 'discount', 'discountType', 'payment', 'products');
   protected $expected_parameters = array();
-  protected $required_parameters = array();
+  protected $required_parameters = array(); // we need either IDs or types.
 
-  public function execute();
+  public function execute(); //just a reminder.
 
-  public function getProducts();
+  public function getProducts() {
+    foreach ($this->product_skus as $sku=>$discounts) {
+      $product = new Product($sku);
+      $product->set_discount($discounts['discount'], $discounts['discountType']);
+      $this->products[] = $product;
+    }
+  }
+
   /* Validation Methods */
+  //TODO these methods need to get the name if given an int and an int if given a name.
+
+  public function set_transactionType($type) {
+    if (is_string($type)) {
+      $query = new Query("SELECT * FROM transactionTypes");
+      $query->execute(array());
+    } else if (is_int($type)) {
+      $query = new Query("SELECT * FROM transactionTypes WHERE id=:id");
+      $query->execute(array('id'=>$type));
+    }
+
+    foreach ($query->results as $transactionType) {
+      if ($transactionType['name'] == $type && $this->set_transactionTypeEffect($transactionType['effect'])) {
+        $this->transactionType = $transactionType['name'];
+        $this->transactionTypeId = $transactionType['id'];
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  public function set_transactionTypeEffect($effect) {
+    $effect = intval($effect);
+    $possibleValues(-1,0,1);
+    if (in_array($effect, $possibleValues)) {
+      $this->transactionTypeEffect = $effect;
+      return true;
+    }
+    return false;
+  }
+
+  public function set_user(Security $security) {
+    //User name comes from $security->user
+    $this->user = $security->user;
+    $this->userId = $security->user_id;
+    return true;
+  }
+/*
+  protected $customer;
+  protected $customerId;
+  protected $total;
+  protected $time;
+  protected $discount;
+  protected $discountType;
+  protected $payment;
+  protected $paymentType;
+
+  protected $products = array(); // array of Products, probably. product id, product name, quantity, regular price, special price
+  protected $product_skus = array(); //sku=>(discount=>'',discountType=>'')
 
 
   /*
