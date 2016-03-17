@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Mar 17, 2016 at 12:59 PM
+-- Generation Time: Mar 17, 2016 at 03:41 PM
 -- Server version: 5.6.28-0ubuntu0.15.10.1
 -- PHP Version: 5.6.11-1ubuntu3.1
 
@@ -73,6 +73,21 @@ CREATE TABLE IF NOT EXISTS `discountTypes` (
 CREATE TABLE IF NOT EXISTS `paymentTypes` (
   `id` int(11) NOT NULL,
   `paymentType` text NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `permissions`
+--
+
+CREATE TABLE IF NOT EXISTS `permissions` (
+  `id` int(11) NOT NULL,
+  `userId` int(11) NOT NULL,
+  `endpoint` tinytext NOT NULL,
+  `target` tinytext NOT NULL,
+  `method` tinytext NOT NULL,
+  `updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -169,7 +184,7 @@ CREATE TABLE IF NOT EXISTS `transactions` (
 
 CREATE TABLE IF NOT EXISTS `transactionTypes` (
   `id` int(11) NOT NULL,
-  `transactionType` text,
+  `name` text,
   `effect` tinyint(4) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
@@ -196,11 +211,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `phone` text,
   `password` text,
   `salt` text,
-  `clerkGroup` int(11) DEFAULT NULL,
-  `productPermissions` int(11) DEFAULT NULL,
-  `reportPermissions` int(11) DEFAULT NULL,
-  `clerkPermissions` int(11) DEFAULT NULL,
-  `customerPermissions` int(11) DEFAULT NULL
+  `clerkGroup` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
@@ -230,6 +241,13 @@ ALTER TABLE `discountTypes`
 --
 ALTER TABLE `paymentTypes`
   ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `permissions`
+--
+ALTER TABLE `permissions`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `userId` (`userId`);
 
 --
 -- Indexes for table `productRecords`
@@ -289,6 +307,11 @@ ALTER TABLE `customerGroups`
 -- AUTO_INCREMENT for table `paymentTypes`
 --
 ALTER TABLE `paymentTypes`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+--
+-- AUTO_INCREMENT for table `permissions`
+--
+ALTER TABLE `permissions`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 --
 -- AUTO_INCREMENT for table `transactionTypes`
