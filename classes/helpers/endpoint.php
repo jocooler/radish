@@ -10,6 +10,8 @@ abstract class Endpoint {
   protected $expected_parameters = array();
   protected $required_parameters = array();
 
+  public function execute();
+
   public function __get($name) {
     // use this so that we can still fetch properties but can't set them directly.
     // this can also take an array of properties to get.
@@ -40,36 +42,6 @@ abstract class Endpoint {
   public function get($name) {
     //an alias for __get. Call it like $product->get('all');
     return $this->__get($name);
-  }
-
-  public function get_query() {
-    $this->query = new Query($this->get_query_string);
-    $results = $this->query->fetch();
-    //TODO: error handling
-  }
-
-  public function put_query() {
-    $this->query = new Query($this->put_query_string);
-    $results = $this->query->fetch();
-    //TODO: error handling
-  }
-
-  public function post_query() {
-    $this->query = new Query($this->post_query_string);
-    $results = $this->query->fetch();
-    //TODO: error handling
-  }
-
-  public function delete_query() {
-    $this->query = new Query($this->delete_query_string);
-    $results = $this->query->fetch();
-    //TODO: error handling
-  }
-
-  public function options_query() {
-    $this->query = new Query($this->options_query_string);
-    $results = $this->query->fetch();
-    //TODO: error handling
   }
 
   public function get_expected_parameters() {

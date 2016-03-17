@@ -39,7 +39,7 @@ abstract class Product extends Endpoint {
       default:
         throw "Product Class requires a valid identifier and an identifier type of sku or upc to initialize.";
     }
-    $this->fetch_details();
+    $this->execute();
   }
 
   public function set_sku($sku) {

@@ -4,7 +4,7 @@ class Put_Product extends Product {
   protected $get_query_string = "SELECT * FROM products WHERE upc=:id";
   public $body;
 
-  public function fetch_details() {
+  public function execute() {
     $get_query_parameters = array ('id'=>$this->upc);
     // 1. get current details.
     $this->query = new Query($this->get_query_string, $get_query_parameters);

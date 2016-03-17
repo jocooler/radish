@@ -1,7 +1,7 @@
 <?php
 class Get_Product extends Product {
   protected $get_query_string = "SELECT * FROM products WHERE sku= :id";
-  public function fetch_details() {
+  public function execute() {
     $this->query = new Query($this->get_query_string, array('id'=>$this->sku));
     if (isset($this->query->results[0])){
       $this->set($this->query->results[0]);

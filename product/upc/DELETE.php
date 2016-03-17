@@ -1,7 +1,7 @@
 <?php
 class Delete_Product extends Product {
   protected $get_query_string = "SELECT * FROM products WHERE upc= :id";
-  public function fetch_details() {
+  public function execute() {
     $this->query = new Query($this->get_query_string, array('id'=>$this->upc));
     if (isset($this->query->results[0])){
       // actually delete

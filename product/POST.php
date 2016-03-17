@@ -6,7 +6,7 @@ class Post_Product extends Product {
   protected $check_query_string = "SELECT sku FROM products WHERE upc = :upc";
   public $body;
 
-  public function fetch_details() {
+  public function execute() {
     $this->set($this->body);
     $check_query = new Query($check_query_string, array('upc'=>$this->upc));
 
