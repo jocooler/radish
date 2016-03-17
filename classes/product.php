@@ -42,6 +42,8 @@ abstract class Product extends Endpoint {
     $this->execute();
   }
 
+  public function execute();
+
   public function set_sku($sku) {
     //TODO: Validate sku
     // I think skus can be anything.
