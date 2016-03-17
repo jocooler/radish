@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Mar 17, 2016 at 11:30 AM
+-- Generation Time: Mar 17, 2016 at 12:59 PM
 -- Server version: 5.6.28-0ubuntu0.15.10.1
 -- PHP Version: 5.6.11-1ubuntu3.1
 
@@ -19,8 +19,6 @@ SET time_zone = "+00:00";
 --
 -- Database: `pos`
 --
-CREATE DATABASE IF NOT EXISTS `pos` DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci;
-USE `pos`;
 
 -- --------------------------------------------------------
 
@@ -69,10 +67,10 @@ CREATE TABLE IF NOT EXISTS `discountTypes` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `paymentMethods`
+-- Table structure for table `paymentTypes`
 --
 
-CREATE TABLE IF NOT EXISTS `paymentMethods` (
+CREATE TABLE IF NOT EXISTS `paymentTypes` (
   `id` int(11) NOT NULL,
   `paymentType` text NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
@@ -113,7 +111,7 @@ CREATE TABLE IF NOT EXISTS `products` (
   `qoh` int(11) DEFAULT NULL,
   `retail` decimal(9,2) NOT NULL DEFAULT '0.00',
   `discount` decimal(9,2) NOT NULL DEFAULT '0.00',
-  `discount_type` int(11) DEFAULT NULL
+  `discountType` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -127,7 +125,8 @@ CREATE TABLE IF NOT EXISTS `productsToTransactions` (
   `transactionId` int(11) DEFAULT NULL,
   `quantity` int(11) DEFAULT NULL,
   `discount` decimal(9,2) NOT NULL DEFAULT '0.00',
-  `discount_type` int(11) DEFAULT NULL
+  `discountType` int(11) DEFAULT NULL,
+  `originalPrice` decimal(9,2) NOT NULL DEFAULT '0.00'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -152,13 +151,13 @@ CREATE TABLE IF NOT EXISTS `sources` (
 
 CREATE TABLE IF NOT EXISTS `transactions` (
   `transactionId` int(11) NOT NULL,
-  `clerkId` int(11) DEFAULT NULL,
+  `userId` int(11) DEFAULT NULL,
   `customerId` int(11) DEFAULT NULL,
   `total` decimal(9,2) DEFAULT NULL,
   `time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `discount` decimal(9,2) DEFAULT NULL,
   `discountType` int(11) DEFAULT NULL,
-  `payment` int(11) DEFAULT NULL,
+  `paymentType` int(11) DEFAULT NULL,
   `transactionType` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
@@ -227,9 +226,9 @@ ALTER TABLE `discountTypes`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indexes for table `paymentMethods`
+-- Indexes for table `paymentTypes`
 --
-ALTER TABLE `paymentMethods`
+ALTER TABLE `paymentTypes`
   ADD PRIMARY KEY (`id`);
 
 --
@@ -287,9 +286,9 @@ ALTER TABLE `users`
 ALTER TABLE `customerGroups`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 --
--- AUTO_INCREMENT for table `paymentMethods`
+-- AUTO_INCREMENT for table `paymentTypes`
 --
-ALTER TABLE `paymentMethods`
+ALTER TABLE `paymentTypes`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 --
 -- AUTO_INCREMENT for table `transactionTypes`
