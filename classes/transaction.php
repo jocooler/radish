@@ -1,7 +1,9 @@
 <?php
 require_once('helpers/functions.php');
 require_once('helpers/endpoint.php');
-require_once('product');
+require_once('product.php');
+require_once('user.php');
+require_once('customer.php');
 
 class Transaction extends Endpoint {
   /* Endpoint specific variables */
@@ -9,13 +11,13 @@ class Transaction extends Endpoint {
   protected $transactionType;
   protected $transactionTypeId;
   protected $transactionTypeEffect;
-  protected $user;
+  protected $user; // TODO should be a user object.
   protected $userId;
-  protected $customer;
+  protected $customer; // TODO should be a customer object.
   protected $customerId;
   protected $total;
   protected $time;
-  protected $discount;
+  protected $discount; // TODO discount object
   protected $discountType;
   protected $payment;
   protected $paymentType;
@@ -66,7 +68,7 @@ class Transaction extends Endpoint {
 
   public function execute(); //just a reminder.
 
-  public function getProducts() {
+  public function set_products(array $products) {
     foreach ($this->product_skus as $sku=>$discounts) {
       $product = new Product($sku);
       $product->set_discount($discounts['discount'], $discounts['discountType']);
@@ -107,27 +109,39 @@ class Transaction extends Endpoint {
     return false;
   }
 
-  public function set_user(Security $security) {
-    //User name comes from $security->user
-    $this->user = $security->user;
-    $this->userId = $security->user_id;
+  public function set_user(User $user) {
+    $this->user = $user;
+    $this->userId = $user->userId;
     return true;
   }
+
+  public function set_customer(Customer $customer) {
+    $this->customer = $customer;
+    $this->customerId = $customer->customerId;
+    return true;
+  }
+
+  public function set_total() {
+    //compute total
+  }
+
+  public function set_time($time) {
+
+  }
+
+  public function set_discount(Discount $discount) {
+    // Discount
+    // discountType
+  }
+
+  public function set_payment($payment) {
+    //int
+    //string
+  }
+
+
+
 /*
-  protected $customer;
-  protected $customerId;
-  protected $total;
-  protected $time;
-  protected $discount;
-  protected $discountType;
-  protected $payment;
-  protected $paymentType;
-
-  protected $products = array(); // array of Products, probably. product id, product name, quantity, regular price, special price
-  protected $product_skus = array(); //sku=>(discount=>'',discountType=>'')
-
-
-  /*
   `transactionId` int(11) NOT NULL,
   `clerkId` int(11) DEFAULT NULL,
   `customerId` int(11) DEFAULT NULL,
@@ -137,7 +151,6 @@ class Transaction extends Endpoint {
   `discountType` int(11) DEFAULT NULL,
   `payment` int(11) DEFAULT NULL,
   `transactionType` int(11) DEFAULT NULL
-
-  */
+*/
 }
 ?>
