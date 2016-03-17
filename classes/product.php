@@ -2,7 +2,10 @@
 require_once('helpers/functions.php');
 require_once('helpers/endpoint.php');
 
+// TODO figure out and validate product discounts for use with transactions...
+
 abstract class Product extends Endpoint {
+  /* Endpoint specific variables */
   protected $category;
   protected $discountType;
   protected $discount;
@@ -15,15 +18,11 @@ abstract class Product extends Endpoint {
   protected $upc;
   protected $wholesale;
 
-  /* These are here as templates. Please re-implement them in each endpoint. */
-  protected $get_query_string = "SELECT * FROM products WHERE sku= :id";
-
-  protected $post_query_string = "INSERT INTO products (`sku`, `upc`, `name`, `manufacturer`, `category`, `wholesale`, `taxable`, `qoh`, `retail`, `discount`, `discount_type`) VALUES (:sku, :upc, :name, :manufacturer, :category, :wholesale, :taxable, , :qoh, :retail, :discount, :discount_type)";
-
-  protected $put_query_string = "UPDATE products SET sku=:sku, upc=:upc, name=:name, manufacturer=:manufacturer, category=:category, wholesale=:wholesale, taxable=:taxable, qoh=:qoh, retail=:retail, discount=:discount, discount_type=:discount_type WHERE sku=:sku";
-
+  /* SQL Queries. These are here as templates. Please re-implement them in each endpoint. */
+  protected $get_query_string = "SELECT * FROM products WHERE sku=:id";
+  protected $post_query_string = "INSERT INTO products (`sku`, `upc`, `name`, `manufacturer`, `category`, `wholesale`, `taxable`, `qoh`, `retail`, `discount`, `discountType`) VALUES (:sku, :upc, :name, :manufacturer, :category, :wholesale, :taxable, , :qoh, :retail, :discount, :discountType)";
+  protected $put_query_string = "UPDATE products SET sku=:sku, upc=:upc, name=:name, manufacturer=:manufacturer, category=:category, wholesale=:wholesale, taxable=:taxable, qoh=:qoh, retail=:retail, discount=:discount, discountType=:discountType WHERE sku=:sku";
   protected $delete_query_string = "DELETE FROM products WHERE sku=:sku";
-
   protected $options_query_string = array(''); // TODO
 
   protected $accessible_fields = array('category', 'discountType', 'discount', 'manufacturer', 'name', 'qoh', 'retail', 'sku', 'taxable', 'upc', 'wholesale');
@@ -43,6 +42,8 @@ abstract class Product extends Endpoint {
   }
 
   public function execute();
+
+  /* Validation Methods */
 
   public function set_sku($sku) {
     //TODO: Validate sku
@@ -69,18 +70,18 @@ abstract class Product extends Endpoint {
     return $category;
   }
 
-  public function set_discount_type($discount_type) {
+  public function set_discountType($discountType) {
     // TODO do we need to validate discount types?
-    //$discount_type = validate("discount_type", $discount_type, FILTER_VALIDATE_FLOAT);
-    if ($discount_type) {
-      $this->discount_type = $discount_type;
+    //$discountType = validate("discountType", $discountType, FILTER_VALIDATE_FLOAT);
+    if ($discountType) {
+      $this->discountType = $discountType;
     }
-    return $discount_type;
+    return $discountType;
   }
 
-  public function set_discount($discount, $discount_type = FALSE) {
-    if ($discount_type != FALSE) {
-      $this->set_discount_type($discount_type);
+  public function set_discount($discount, $discountType = FALSE) {
+    if ($discountType != FALSE) {
+      $this->set_discountType($discountType);
     }
 
     $discount = validate("discount", $discount, FILTER_VALIDATE_FLOAT);
@@ -132,15 +133,6 @@ abstract class Product extends Endpoint {
     return $wholesale;
   }
 
-  public function set(array $values) {
-    //takes a 2d array and sets the values in it.
-    foreach ($values as $key=>$value) {
-      $set_function = "set_" . $key;
-      if (method_exists($this, $set_function)) {
-         $this->$set_function($value);
-      }
-    }
-  }
 }
 
 ?>

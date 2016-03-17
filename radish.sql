@@ -126,7 +126,8 @@ CREATE TABLE IF NOT EXISTS `productsToTransactions` (
   `sku` varchar(50) NOT NULL,
   `transactionId` int(11) DEFAULT NULL,
   `quantity` int(11) DEFAULT NULL,
-  `specialPrice` decimal(9,2) DEFAULT NULL
+  `discount` decimal(9,2) NOT NULL DEFAULT '0.00',
+  `discount_type` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------

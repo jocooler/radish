@@ -44,6 +44,16 @@ abstract class Endpoint {
     return $this->__get($name);
   }
 
+  public function set(array $values) {
+    //takes a 2d array and sets the values in it.
+    foreach ($values as $key=>$value) {
+      $set_function = "set_" . $key;
+      if (method_exists($this, $set_function)) {
+         $this->$set_function($value);
+      }
+    }
+  }
+
   public function get_expected_parameters() {
     return $this->expected_parameters;
   }
