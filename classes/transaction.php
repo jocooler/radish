@@ -77,8 +77,6 @@ class Transaction extends Endpoint {
   }
 
   /* Validation Methods */
-  //TODO these methods need to get the name if given an int and an int if given a name.
-
   public function set_transactionType($type) {
     if (is_string($type)) {
       $query = new Query("SELECT * FROM transactionTypes");
@@ -138,6 +136,7 @@ class Transaction extends Endpoint {
     //int
     //string
   }
+
 
 
 
