@@ -37,6 +37,15 @@ class Discount {
   productGroup1, productGroup2, discount, discountType (percentage = true, fixed is false), minimum, limit/max, stackable
   */
 
+  // we need to figure out the order in which to apply discounts.
+  // I think it's:
+  // products fixed, highest to low
+  // products percentage, highest to low
+  // transaction fixed, highest to low
+  // transaction percentage, high to low
+  // user fixed, high to low
+  // user percentage, high to low
+
   public function execute($price) {
     return $price;
   }

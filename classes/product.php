@@ -2,12 +2,9 @@
 require_once('helpers/functions.php');
 require_once('helpers/endpoint.php');
 
-// TODO figure out and validate product discounts for use with transactions...
-
 abstract class Product extends Endpoint {
   /* Endpoint specific variables */
   protected $category;
-  protected $discount;
   protected $manufacturer;
   protected $name;
   protected $qoh;
@@ -19,12 +16,12 @@ abstract class Product extends Endpoint {
 
   /* SQL Queries. These are here as templates. Please re-implement them in each endpoint. */
   protected $get_query_string = "SELECT * FROM products WHERE sku=:id";
-  protected $post_query_string = "INSERT INTO products (`sku`, `upc`, `name`, `manufacturer`, `category`, `wholesale`, `taxable`, `qoh`, `retail`, `discountId`) VALUES (:sku, :upc, :name, :manufacturer, :category, :wholesale, :taxable, , :qoh, :retail, :discountId)";
-  protected $put_query_string = "UPDATE products SET sku=:sku, upc=:upc, name=:name, manufacturer=:manufacturer, category=:category, wholesale=:wholesale, taxable=:taxable, qoh=:qoh, retail=:retail, discount=:discount, discountType=:discountType WHERE sku=:sku";
+  protected $post_query_string = "INSERT INTO products (`sku`, `upc`, `name`, `manufacturer`, `category`, `wholesale`, `taxable`, `qoh`, `retail`) VALUES (:sku, :upc, :name, :manufacturer, :category, :wholesale, :taxable, , :qoh, :retail)";
+  protected $put_query_string = "UPDATE products SET sku=:sku, upc=:upc, name=:name, manufacturer=:manufacturer, category=:category, wholesale=:wholesale, taxable=:taxable, qoh=:qoh, retail=:retail WHERE sku=:sku";
   protected $delete_query_string = "DELETE FROM products WHERE sku=:sku";
   protected $options_query_string = array(''); // TODO
 
-  protected $accessible_fields = array('category', 'discount', 'manufacturer', 'name', 'qoh', 'retail', 'sku', 'taxable', 'upc', 'wholesale');
+  protected $accessible_fields = array('category', 'manufacturer', 'name', 'qoh', 'retail', 'sku', 'taxable', 'upc', 'wholesale');
 
   public function __construct ($identifier, $identifier_type) {
     switch ($identifier_type) {
@@ -67,14 +64,6 @@ abstract class Product extends Endpoint {
       $this->category = $category;
     }
     return $category;
-  }
-
-  public function set_discount($discount) {
-    if (!is_a($discount, Discount)) {
-      $discount = new Discount($discount);
-    }
-      $this->discount = $discount;
-    return true;
   }
 
   public function set_manufacturer($manufacturer) {
