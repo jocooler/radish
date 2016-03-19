@@ -31,10 +31,10 @@ class Discount {
   buy min of x1 get x2*(1-z) limit // buy 2 of x1, get 20% off each x2 up to the limit
 
   bogo with stackable limits
-  same as limits with a stackable flag.
+  same as bogo limits with a stackable flag.
 
   I think we need these fields:
-  productGroup1, productGroup2, discount, discountType (fixed or percentage), minimum, limit, stackable
+  productGroup1, productGroup2, discount, discountType (percentage = true, fixed is false), minimum, limit/max, stackable
   */
 
   public function execute($price) {

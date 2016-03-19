@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Mar 17, 2016 at 03:41 PM
+-- Generation Time: Mar 19, 2016 at 04:33 PM
 -- Server version: 5.6.28-0ubuntu0.15.10.1
 -- PHP Version: 5.6.11-1ubuntu3.1
 
@@ -40,7 +40,6 @@ CREATE TABLE IF NOT EXISTS `customerGroups` (
 CREATE TABLE IF NOT EXISTS `customers` (
   `id` int(11) NOT NULL,
   `name` text,
-  `primaryStore` int(11) DEFAULT NULL,
   `customerGroup` int(11) DEFAULT NULL,
   `address` text,
   `address2` text,
@@ -49,8 +48,24 @@ CREATE TABLE IF NOT EXISTS `customers` (
   `zip` text,
   `phone` text,
   `email` text,
-  `discount` decimal(9,2) DEFAULT NULL,
-  `discountType` int(11) DEFAULT NULL
+  `discountId` decimal(9,2) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `discounts`
+--
+
+CREATE TABLE IF NOT EXISTS `discounts` (
+  `id` int(11) NOT NULL,
+  `group1` int(11) DEFAULT NULL,
+  `group2` int(11) DEFAULT NULL,
+  `discount` int(11) NOT NULL,
+  `percentage` tinyint(1) NOT NULL DEFAULT '1',
+  `min` int(11) NOT NULL DEFAULT '0',
+  `max` int(11) NOT NULL DEFAULT '0',
+  `stackable` tinyint(1) NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -93,6 +108,18 @@ CREATE TABLE IF NOT EXISTS `permissions` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `productGroups`
+--
+
+CREATE TABLE IF NOT EXISTS `productGroups` (
+  `id` int(11) NOT NULL,
+  `name` varchar(1000) DEFAULT NULL,
+  `description` varchar(1000) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `productRecords`
 --
 
@@ -125,8 +152,18 @@ CREATE TABLE IF NOT EXISTS `products` (
   `taxable` tinyint(1) NOT NULL DEFAULT '0',
   `qoh` int(11) DEFAULT NULL,
   `retail` decimal(9,2) NOT NULL DEFAULT '0.00',
-  `discount` decimal(9,2) NOT NULL DEFAULT '0.00',
-  `discountType` int(11) DEFAULT NULL
+  `discountId` decimal(9,2) NOT NULL DEFAULT '0.00'
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `productsToGroups`
+--
+
+CREATE TABLE IF NOT EXISTS `productsToGroups` (
+  `productId` int(11) NOT NULL,
+  `productGroupId` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -170,8 +207,7 @@ CREATE TABLE IF NOT EXISTS `transactions` (
   `customerId` int(11) DEFAULT NULL,
   `total` decimal(9,2) DEFAULT NULL,
   `time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `discount` decimal(9,2) DEFAULT NULL,
-  `discountType` int(11) DEFAULT NULL,
+  `discountId` decimal(9,2) DEFAULT NULL,
   `paymentType` int(11) DEFAULT NULL,
   `transactionType` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
@@ -231,6 +267,12 @@ ALTER TABLE `customers`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `discounts`
+--
+ALTER TABLE `discounts`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `discountTypes`
 --
 ALTER TABLE `discountTypes`
@@ -250,6 +292,12 @@ ALTER TABLE `permissions`
   ADD KEY `userId` (`userId`);
 
 --
+-- Indexes for table `productGroups`
+--
+ALTER TABLE `productGroups`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `productRecords`
 --
 ALTER TABLE `productRecords`
@@ -263,6 +311,12 @@ ALTER TABLE `products`
   ADD KEY `upc` (`upc`),
   ADD KEY `name` (`name`),
   ADD KEY `manufacturer` (`manufacturer`);
+
+--
+-- Indexes for table `productsToGroups`
+--
+ALTER TABLE `productsToGroups`
+  ADD UNIQUE KEY `productId` (`productId`,`productGroupId`);
 
 --
 -- Indexes for table `sources`
@@ -304,6 +358,11 @@ ALTER TABLE `users`
 ALTER TABLE `customerGroups`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 --
+-- AUTO_INCREMENT for table `discounts`
+--
+ALTER TABLE `discounts`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+--
 -- AUTO_INCREMENT for table `paymentTypes`
 --
 ALTER TABLE `paymentTypes`
@@ -312,6 +371,11 @@ ALTER TABLE `paymentTypes`
 -- AUTO_INCREMENT for table `permissions`
 --
 ALTER TABLE `permissions`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+--
+-- AUTO_INCREMENT for table `productGroups`
+--
+ALTER TABLE `productGroups`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 --
 -- AUTO_INCREMENT for table `transactionTypes`
