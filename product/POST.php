@@ -1,7 +1,7 @@
 <?php
 //TODO not yet done
 class Post_Product extends Product {
-  protected $post_query_string = "INSERT INTO products (`sku`, `upc`, `name`, `manufacturer`, `category`, `wholesale`, `taxable`, `qoh`, `retail`, `discount`, `discount_type`) VALUES (:sku, :upc, :name, :manufacturer, :category, :wholesale, :taxable, :qoh, :retail, :discount, :discount_type)";
+  protected $post_query_string = "INSERT INTO products (`sku`, `upc`, `name`, `manufacturer`, `category`, `wholesale`, `taxable`, `qoh`, `retail`, `discountId`) VALUES (:sku, :upc, :name, :manufacturer, :category, :wholesale, :taxable, :qoh, :retail, :discountId)";
   protected $max_query_string = "SELECT MAX as max from products";
   protected $check_query_string = "SELECT sku FROM products WHERE upc = :upc";
   public $body;
@@ -30,8 +30,7 @@ class Post_Product extends Product {
         'taxable'       => $this->taxable,
         'qoh'           => $this->qoh,
         'retail'        => $this->retail,
-        'discount'      => $this->discount,
-        'discount_type' => $this->discount_type
+        'discountId'      => $this->discountId
       );
 
       $this->query = new Query($post_query_string, $post_query_parameters);

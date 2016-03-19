@@ -7,7 +7,6 @@ require_once('helpers/endpoint.php');
 abstract class Product extends Endpoint {
   /* Endpoint specific variables */
   protected $category;
-  protected $discountType;
   protected $discount;
   protected $manufacturer;
   protected $name;
@@ -20,12 +19,12 @@ abstract class Product extends Endpoint {
 
   /* SQL Queries. These are here as templates. Please re-implement them in each endpoint. */
   protected $get_query_string = "SELECT * FROM products WHERE sku=:id";
-  protected $post_query_string = "INSERT INTO products (`sku`, `upc`, `name`, `manufacturer`, `category`, `wholesale`, `taxable`, `qoh`, `retail`, `discount`, `discountType`) VALUES (:sku, :upc, :name, :manufacturer, :category, :wholesale, :taxable, , :qoh, :retail, :discount, :discountType)";
+  protected $post_query_string = "INSERT INTO products (`sku`, `upc`, `name`, `manufacturer`, `category`, `wholesale`, `taxable`, `qoh`, `retail`, `discountId`) VALUES (:sku, :upc, :name, :manufacturer, :category, :wholesale, :taxable, , :qoh, :retail, :discountId)";
   protected $put_query_string = "UPDATE products SET sku=:sku, upc=:upc, name=:name, manufacturer=:manufacturer, category=:category, wholesale=:wholesale, taxable=:taxable, qoh=:qoh, retail=:retail, discount=:discount, discountType=:discountType WHERE sku=:sku";
   protected $delete_query_string = "DELETE FROM products WHERE sku=:sku";
   protected $options_query_string = array(''); // TODO
 
-  protected $accessible_fields = array('category', 'discountType', 'discount', 'manufacturer', 'name', 'qoh', 'retail', 'sku', 'taxable', 'upc', 'wholesale');
+  protected $accessible_fields = array('category', 'discount', 'manufacturer', 'name', 'qoh', 'retail', 'sku', 'taxable', 'upc', 'wholesale');
 
   public function __construct ($identifier, $identifier_type) {
     switch ($identifier_type) {
@@ -70,25 +69,12 @@ abstract class Product extends Endpoint {
     return $category;
   }
 
-  public function set_discountType($discountType) {
-    // TODO do we need to validate discount types?
-    //$discountType = validate("discountType", $discountType, FILTER_VALIDATE_FLOAT);
-    if ($discountType) {
-      $this->discountType = $discountType;
+  public function set_discount($discount) {
+    if (!is_a($discount, Discount)) {
+      $discount = new Discount($discount);
     }
-    return $discountType;
-  }
-
-  public function set_discount($discount, $discountType = FALSE) {
-    if ($discountType != FALSE) {
-      $this->set_discountType($discountType);
-    }
-
-    $discount = validate("discount", $discount, FILTER_VALIDATE_FLOAT);
-    if ($discount) {
       $this->discount = $discount;
-    }
-    return $discount;
+    return true;
   }
 
   public function set_manufacturer($manufacturer) {

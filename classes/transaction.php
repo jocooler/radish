@@ -68,6 +68,7 @@ class Transaction extends Endpoint {
 
   public function execute(); //just a reminder.
 
+  /* Validation Methods */
   public function set_products(array $products) {
     foreach ($this->product_skus as $sku=>$discounts) {
       $product = new Product($sku);
@@ -76,7 +77,6 @@ class Transaction extends Endpoint {
     }
   }
 
-  /* Validation Methods */
   public function set_transactionType($type) {
     if (is_string($type)) {
       $query = new Query("SELECT * FROM transactionTypes");
@@ -128,11 +128,12 @@ class Transaction extends Endpoint {
   }
 
   public function set_discount(Discount $discount) {
-    // Discount
-    // discountType
+    $this->discount = $discount->discount;
+    $this->discountType = $discount->discountType;
+    return true;
   }
 
-  public function set_payment($payment) {
+  public function set_payment(Payment $payment) {
     //int
     //string
   }
