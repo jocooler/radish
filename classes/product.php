@@ -9,6 +9,7 @@ abstract class Product extends Endpoint {
   protected $name;
   protected $qoh;
   protected $retail;
+  protected $price; // includes any discounts. Intially equal to retail.
   protected $sku;
   protected $taxable;
   protected $upc;
@@ -90,6 +91,7 @@ abstract class Product extends Endpoint {
     $retail = validate("retail", $retail, FILTER_VALIDATE_FLOAT);
     if ($retail) {
       $this->retail = $retail;
+      $this->price = $retail;
     }
     return $retail;
   }

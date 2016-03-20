@@ -37,18 +37,44 @@ class Discount {
   productGroup1, productGroup2, discount, discountType (percentage = true, fixed is false), minimum, limit/max, stackable
   */
 
-  // we need to figure out the order in which to apply discounts.
-  // I think it's:
-  // products fixed, highest to low
-  // products percentage, highest to low
-  // transaction fixed, highest to low
-  // transaction percentage, high to low
-  // user fixed, high to low
-  // user percentage, high to low
-  // bogo needs to check value of items.
+  public function apply($products) {
+    //products: array(sku123=>array('product'=>Product->price, 'quantity'=>2))
 
+  }
   public function execute($price) {
     return $price;
+  }
+
+  public static function sort(array $discounts, array $products) {
+    //discounts: array(Discount1, Discount2...)
+    //products: array(sku123=>array('product'=>Product->price, 'quantity'=>2))
+    foreach ($discounts as $discount) {
+      // we need to figure out the order in which to apply discounts.
+      // I think it's:
+      // products fixed, highest to low
+      // products percentage, highest to low
+      // transaction fixed, highest to low
+      // transaction percentage, high to low
+      // user fixed, high to low
+      // user percentage, high to low
+      // bogo needs to check value of items.
+
+      /* more accurately:
+      1. Count how many products each discount applies to.
+        a. get the group number for each discount.
+        b. select * from productsToGroups where sku = Product->sku AND groups IN (each discount group number)
+        c. TODO: some discounts may not be combined. This should be taken into account.
+        TODO maybe we need a super field for things like employee discounts that can be combined potentially even if others cannot.
+        TODO super discounts might include a birthday discount off of a sale item.
+        TODO maybe we need to rethink birthday money as a payment and not as a discount.
+      2. If there are ties
+        a. percentages first
+          i. sort percentages descending
+        b. fixed next
+          i. sort fixed descending
+      */
+
+    }
   }
 
 }
