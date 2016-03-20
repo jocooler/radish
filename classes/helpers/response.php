@@ -98,7 +98,7 @@ class Response {
     if (count($exclude) == 0) {
       $exclude = $this->exclude;
     }
-    return $raw; // filter needs to be handled in each endpoint, not in the response. TODO
+    return $raw; // TODO include and exclude.
     $filtered_data = $raw;
     if (count($include)) {
       $filtered_array = array_filter($filtered_data, function ($key) use ($include) {print_r($key); return in_array($key, $include);}, ARRAY_FILTER_USE_KEY);

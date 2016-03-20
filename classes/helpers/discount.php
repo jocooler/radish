@@ -45,6 +45,7 @@ class Discount {
   // transaction percentage, high to low
   // user fixed, high to low
   // user percentage, high to low
+  // bogo needs to check value of items.
 
   public function execute($price) {
     return $price;

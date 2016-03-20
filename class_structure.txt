@@ -37,6 +37,8 @@ b. index.php
   b. body
 7. return page
 
+transaction/compute endpoint will be used to check products as they are entered and set any discounts.
+
 request {
   path
   targets[]

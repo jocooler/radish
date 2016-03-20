@@ -17,8 +17,7 @@ class Transaction extends Endpoint {
   protected $customerId;
   protected $total;
   protected $time;
-  protected $discount; // TODO discount object
-  protected $discountType;
+  protected $discount; //TODO this should be plural throughout. There may be many discounts applied to a transaction.
   protected $payment;
   protected $paymentType;
 
@@ -36,7 +35,6 @@ class Transaction extends Endpoint {
           t.total,
           t.time,
           t.discount,
-          t.discountType,
           p.paymentType as payment
       FROM
           transactions t,
@@ -53,26 +51,25 @@ class Transaction extends Endpoint {
   protected $get_products_query_string = "SELECT * FROM productsToTransactions WHERE transactionId = :transactionId";
 
   protected $post_query_string =
-      "INSERT INTO `transactions`(`transactionId`, `userId`, `customerId`, `total`, `time`, `discount`, `discountType`, `paymentType`, `transactionType`)
-      VALUES (:transactionId, :userId, :customerId, :total, :time, :discount, :discountType, :paymentType, :transactionType)"; // if we tweak this to do multiple values statements, doing the select statments once will be faster than doing them many times.
+      "INSERT INTO `transactions`(`transactionId`, `userId`, `customerId`, `total`, `time`, `discount`, `paymentType`, `transactionType`)
+      VALUES (:transactionId, :userId, :customerId, :total, :time, :discount, :paymentType, :transactionType)"; // if we tweak this to do multiple values statements, doing the select statments once will be faster than doing them many times.
   protected $post_products_query_string =
-      "INSERT INTO `productsToTransactions`(`sku`, `transactionId`, `quantity`, `originalPrice`, `discount`, `discountType`)
-      VALUES (:sku, :transactionId, :quantity, :originalPrice, :discount, :discountType)";
+      "INSERT INTO `productsToTransactions`(`sku`, `transactionId`, `quantity`, `originalPrice`, `discount`)
+      VALUES (:sku, :transactionId, :quantity, :originalPrice, :discount)";
 
   protected $put_query_string = ''; // we aren't using PUT with transactions
   protected $delete_query_string = ''; // we aren't using DELETE with transactions
   protected $options_query_string = ''; //TODO
-  protected $accessible_fields = array('transactionId', 'transactionType', 'user', 'customer', 'total', 'time', 'discount', 'discountType', 'payment', 'products');
+  protected $accessible_fields = array('transactionId', 'transactionType', 'user', 'customer', 'total', 'time', 'discount', 'payment', 'products');
   protected $expected_parameters = array();
   protected $required_parameters = array(); // we need either IDs or types.
 
   public function execute(); //just a reminder.
 
   /* Validation Methods */
-  public function set_products(array $products) {
+  public function set_products(array $products) { //TODO maybe this should not require a product - maybe this sets the products as they come in.
     foreach ($this->product_skus as $sku=>$discounts) {
       $product = new Product($sku);
-      $product->set_discount($discounts['discount'], $discounts['discountType']);
       $this->products[] = $product;
     }
   }
@@ -119,38 +116,45 @@ class Transaction extends Endpoint {
     return true;
   }
 
-  public function set_total() {
-    //compute total
-  }
-
-  public function set_time($time) {
-
-  }
-
-  public function set_discount(Discount $discount) {
-    $this->discount = $discount->discount;
-    $this->discountType = $discount->discountType;
+  public function set_total($total) {
+    if (is_numeric($total)) {
+      $this->total = $total + 0;
+    }
     return true;
   }
 
-  public function set_payment(Payment $payment) {
-    //int
-    //string
+  public function set_time($time) {
+    $dateTime = new DateTime($time);
+    $this->time = $dateTime->getTimestamp();
+    return true;
   }
 
+  public function set_discount(Discount $discount) {
+    $this->discount = $discount
+    return true;
+  }
 
+  public function set_payment($payment) {
+    $query = new Query("SELECT * FROM paymentTypes");
+    $query->execute(array());
+    $results = $query->results;
 
+    foreach ($payment as $method=>$amount) { //TODO not sure if this is correct syntax
+      if (is_numeric($amount) && (
+              $results['name'] == $method ||
+              $results['id'] == $method
+        )) {
+        $this->payment[] = array($results['name'] => $amount + 0);
+        $this->paymentType[] = array($results['id'] => $amount + 0);
+      }
+    }
 
-/*
-  `transactionId` int(11) NOT NULL,
-  `clerkId` int(11) DEFAULT NULL,
-  `customerId` int(11) DEFAULT NULL,
-  `total` decimal(9,2) DEFAULT NULL,
-  `time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `discount` decimal(9,2) DEFAULT NULL,
-  `discountType` int(11) DEFAULT NULL,
-  `payment` int(11) DEFAULT NULL,
-  `transactionType` int(11) DEFAULT NULL
-*/
+    if (count($payment) > 0) {
+      return true;
+    }
+
+    return false;
+  }
+
 }
 ?>
