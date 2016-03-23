@@ -14,7 +14,7 @@ abstract class Product extends Endpoint {
   protected $taxable;
   protected $upc;
   protected $wholesale;
-  protected $discount;
+  protected $discounts = array();
 
   /* SQL Queries. These are here as templates. Please re-implement them in each endpoint. */
   protected $get_query_string = "SELECT * FROM products WHERE sku=:id";
@@ -23,7 +23,7 @@ abstract class Product extends Endpoint {
   protected $delete_query_string = "DELETE FROM products WHERE sku=:sku";
   protected $options_query_string = array(''); // TODO
 
-  protected $accessible_fields = array('category', 'manufacturer', 'name', 'qoh', 'retail', 'sku', 'taxable', 'upc', 'wholesale');
+  protected $accessible_fields = array('category', 'manufacturer', 'name', 'qoh', 'retail', 'sku', 'taxable', 'upc', 'wholesale', 'discounts');
 
   public function __construct ($identifier, $identifier_type) {
     switch ($identifier_type) {
@@ -103,11 +103,17 @@ abstract class Product extends Endpoint {
     }
   }
 
-  public function set_discount($discount) {
+  public function set_discounts($discount) {
+    if (is_array($discount)) {
+      foreach ($discount as $d) {
+        $this->set_discount($d);
+      }
+      return false; // don't do what's after this if we're an array.
+    }
     if (!is_a($discount, "Discount")) {
       $discount = new Discount($discount);
     }
-    $this->discount = $discount;
+    $this->discounts[] = $discount;
   }
 
 }

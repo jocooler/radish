@@ -1,6 +1,6 @@
 <?php
 class Put_Product extends Product {
-  protected $put_query_string = "UPDATE products SET sku=:sku, upc=:upc, name=:name, manufacturer=:manufacturer, category=:category, wholesale=:wholesale, taxable=:taxable, qoh=:qoh, retail=:retail WHERE upc=:upc";
+  protected $put_query_string = "UPDATE products SET sku=:sku, upc=:upc, name=:name, manufacturer=:manufacturer, category=:category, wholesale=:wholesale, taxable=:taxable, qoh=:qoh, retail=:retail, discount=:discount WHERE upc=:upc";
   protected $get_query_string = "SELECT * FROM products WHERE upc=:id";
   public $body;
 
@@ -21,7 +21,8 @@ class Put_Product extends Product {
         'wholesale'     => $this->wholesale,
         'taxable'       => $this->taxable,
         'qoh'           => $this->qoh,
-        'retail'        => $this->retail
+        'retail'        => $this->retail,
+        'discount'      => serialize($this->discounts)
       );
       $put_query = new Query($this->put_query_string, $put_query_parameters);
       // TODO error checking.
