@@ -14,6 +14,7 @@ abstract class Product extends Endpoint {
   protected $taxable;
   protected $upc;
   protected $wholesale;
+  protected $discount;
 
   /* SQL Queries. These are here as templates. Please re-implement them in each endpoint. */
   protected $get_query_string = "SELECT * FROM products WHERE sku=:id";
@@ -56,7 +57,6 @@ abstract class Product extends Endpoint {
     } else {
       $upc = '';
     }
-    return $upc;
   }
 
   public function set_category($category) {
@@ -64,19 +64,16 @@ abstract class Product extends Endpoint {
     if ($category) {
       $this->category = $category;
     }
-    return $category;
   }
 
   public function set_manufacturer($manufacturer) {
     //TODO do we need to validate manufacturer?
     $this->manufacturer = $manufacturer;
-    return $manufacturer;
   }
 
   public function set_name($name) {
     //TODO Do we need to validate the name?
     $this->name = $name;
-    return $name;
   }
 
   public function set_qoh($qoh) {
@@ -84,7 +81,6 @@ abstract class Product extends Endpoint {
     if ($qoh) {
       $this->qoh = $qoh;
     }
-    return $qoh;
   }
 
   public function set_retail($retail) {
@@ -93,13 +89,11 @@ abstract class Product extends Endpoint {
       $this->retail = $retail;
       $this->price = $retail;
     }
-    return $retail;
   }
 
   public function set_taxable($taxable) {
     $taxable = validate("taxable", $taxable, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
     $this->taxable = $taxable;
-    return $taxable;
   }
 
   public function set_wholesale($wholesale) {
@@ -107,7 +101,13 @@ abstract class Product extends Endpoint {
     if ($wholesale) {
       $this->wholesale = $wholesale;
     }
-    return $wholesale;
+  }
+
+  public function set_discount($discount) {
+    if (!is_a($discount, "Discount")) {
+      $discount = new Discount($discount);
+    }
+    $this->discount = $discount;
   }
 
 }

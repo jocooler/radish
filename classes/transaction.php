@@ -77,7 +77,9 @@ class Transaction extends Endpoint {
   public function set_products(array $products) {
     //products arrive as array('id'=>array('type' => 'idType', 'quantity' => 'quantity'));
     foreach ($products as $id=>$productData) {
-      $product = new Product($id, $productData['idType']);
+      if (!is_a($productData['product'], "Product")) {
+        $product = new Product($id, $productData['idType']);
+      }
       if (array_key_exists($product->sku, $this->products)) {
         $this->products[$product->sku]['quantity'] += $productData['quantity'];
       } else {
@@ -85,7 +87,6 @@ class Transaction extends Endpoint {
         $this->products[$product->sku]['quantity'] = $productData['quantity'];
       }
     }
-    return true;
   }
 
   public function set_transactionType($type) {
@@ -101,11 +102,8 @@ class Transaction extends Endpoint {
       if ($transactionType['name'] == $type && $this->set_transactionTypeEffect($transactionType['effect'])) {
         $this->transactionType = $transactionType['name'];
         $this->transactionTypeId = $transactionType['id'];
-        return true;
       }
     }
-
-    return false;
   }
 
   public function set_transactionTypeEffect($effect) {
@@ -113,44 +111,41 @@ class Transaction extends Endpoint {
     $possibleValues(-1,0,1);
     if (in_array($effect, $possibleValues)) {
       $this->transactionTypeEffect = $effect;
-      return true;
     }
-    return false;
   }
 
-  public function set_user(User $user) { //TODO take in a user id from security and make a user out of it. Or have security create the user.
-    // $user = $this->create_user($user);
+  public function set_user($user) {
+    if (!is_a($user, 'User')) {
+      $user = new User($user);
+    }
     $this->user = $user;
-    $this->userId = $user->userId;
-    return true;
   }
 
-  public function set_customer(Customer $customer) { //TODO take in a customer name or id and make a customer out of it.
+  public function set_customer($customer) {
+    if (!is_a($customer, 'Customer')) {
+      $customer = new Customer($customer);
+    }
     $this->customer = $customer;
-    $this->customerId = $customer->customerId;
-    return true;
   }
 
   public function set_total($total) {
     if (is_numeric($total)) {
       $this->total = $total + 0;
     }
-    return true;
   }
 
   public function set_time($time) {
     $dateTime = new DateTime($time);
     $this->time = $dateTime->getTimestamp();
-    return true;
   }
 
   public function set_discounts(array $discounts) {
     foreach ($discounts as $discount) {
-      if (is_a($discount,"Discount")) { //TODO take in discount ids and create discounts from them
-        $this->discounts[] = $discount;
+      if (!is_a($discount,"Discount")) {
+        $discount = new Discount($discount);
       }
+      $this->discounts[] = $discount;
     }
-    return true;
   }
 
   public function set_payment($payment) {
@@ -166,12 +161,6 @@ class Transaction extends Endpoint {
         $this->payment[] = array($results['id'] => array('name' => $results['name'], 'amount' => $amount + 0);
       }
     }
-
-    if (count($payment) > 0) {
-      return true;
-    }
-
-    return false;
   }
 
 }
