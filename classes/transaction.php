@@ -60,6 +60,14 @@ class Transaction extends Endpoint {
   protected $expected_parameters = array();
   protected $required_parameters = array(); // we need either IDs or types.
 
+
+  public function __contstructor($id = false) {
+    if ($id !== false) {
+      $this->set_transactionId($id);
+    }
+    $this->execute();
+  }
+
   public function execute(); //just a reminder.
 
   public function check_total() {
@@ -86,6 +94,13 @@ class Transaction extends Endpoint {
         $this->products[$product->sku]['product'] = $product;
         $this->products[$product->sku]['quantity'] = $productData['quantity'];
       }
+    }
+  }
+
+  public function set_transactionId($id) {
+    $id = validate("id", $id, FILTER_VALIDATE_INT);
+    if ($id) {
+      $this->transactionId = $id;
     }
   }
 
