@@ -4,9 +4,9 @@ Radish seeks to be an open source, full-featured Point of Sale system and invent
 
 Status:
 * /product is done except for search/GET and OPTIONS.
+* /transactions is done except for compute and indexes.
 
 Deck:
-* transaction/type/POST
 * transaction/index.php s
 * transaction/compute/GET
 * Discount class
