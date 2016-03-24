@@ -4,10 +4,9 @@ Radish seeks to be an open source, full-featured Point of Sale system and invent
 
 Status:
 * /product is done except for search/GET and OPTIONS.
-* /transactions is done except for compute and indexes.
+* /transactions is done except for compute.
 
 Deck:
-* transaction/index.php s
 * transaction/compute/GET
 * Discount class
 * Change product endpoint to account for dropping discountId column and adding columns for lastUpdated and reorderQuantity
