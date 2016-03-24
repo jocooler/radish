@@ -11,7 +11,6 @@ Deck:
 * Discount class
 * Change product endpoint to account for dropping discountId column and adding columns for lastUpdated and reorderQuantity
 
-
 By decoupling the database/API layer from the front end, we create a system designed to extend and integrate and "play nice" with other products. The aim of this project is to offer a variety of UIs and consumers for the API to make it easy to integrate with websites and existing tools.
 
 Key Features:
@@ -27,7 +26,7 @@ Key Features:
 Requirements:
 * PHP 5.5+
 * MySQL or compatible DB
-* currently testing on Apache, but hope to become server agnostic
+* currently testing on Apache, but hopefully server agnostic. Once complete, reports and pull requests to support other servers welcome.
 
 What follows is my rough planning outline of what the API will look like.
 
@@ -142,5 +141,5 @@ ID the user - public + secret
 Prevent tampering - public + non-transmitted secret (diceware word phrase)
 
 https://github.com/digitalbazaar/forge
-http://stackoverflow.com/questions/5288150/is-digest-authentication-possible-with-jquery
+
 http://stackoverflow.com/questions/5507234/how-to-use-basic-auth-with-jquery-and-ajax
