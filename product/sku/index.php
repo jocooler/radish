@@ -1,11 +1,10 @@
 <?php
   $path = "../../classes/";
-  require($path . "product.php");
-  require($path . "helpers/request.php");
-  require($path . "helpers/security.php");
-  require($path . "helpers/query.php");
-  require($path . "helpers/response.php");
-  require($path . "helpers/discount.php");
+  require_once($path . "product.php");
+  require_once($path . "helpers/request.php");
+  require_once($path . "helpers/security.php");
+  require_once($path . "helpers/query.php");
+  require_once($path . "helpers/response.php");
 
   try {
     require($_SERVER['REQUEST_METHOD'] . ".php");

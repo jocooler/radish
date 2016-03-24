@@ -1,9 +1,15 @@
 <?php
   $path = "../../classes/";
-  require($path . "transaction.php");
-  require($path . "helpers/request.php");
-  require($path . "helpers/security.php");
-  require($path . "helpers/query.php");
-  require($path . "helpers/response.php");
-  require($_SERVER['REQUEST_METHOD'] . ".php");
+  require_once($path . "transaction.php");
+  require_once($path . "helpers/request.php");
+  require_once($path . "helpers/security.php");
+  require_once($path . "helpers/query.php");
+  require_once($path . "helpers/response.php");
+
+  try {
+    require($_SERVER['REQUEST_METHOD'] . ".php");
+  } catch (Exception $e) {
+    $response = new Response(405, array());
+    $response->send();
+  }
 ?>
