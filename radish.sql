@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Mar 19, 2016 at 04:33 PM
+-- Generation Time: Mar 24, 2016 at 03:57 PM
 -- Server version: 5.6.28-0ubuntu0.15.10.1
 -- PHP Version: 5.6.11-1ubuntu3.1
 
@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS `customers` (
   `zip` text,
   `phone` text,
   `email` text,
-  `discountId` decimal(9,2) DEFAULT NULL
+  `discounts` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -61,11 +61,13 @@ CREATE TABLE IF NOT EXISTS `discounts` (
   `id` int(11) NOT NULL,
   `group1` int(11) DEFAULT NULL,
   `group2` int(11) DEFAULT NULL,
-  `discount` int(11) NOT NULL,
+  `discount` decimal(17,6) NOT NULL,
   `percentage` tinyint(1) NOT NULL DEFAULT '1',
   `min` int(11) NOT NULL DEFAULT '0',
   `max` int(11) NOT NULL DEFAULT '0',
-  `stackable` tinyint(1) NOT NULL DEFAULT '0'
+  `stackable` tinyint(1) NOT NULL DEFAULT '0',
+  `automatic` tinyint(1) NOT NULL DEFAULT '0',
+  `active` tinyint(1) NOT NULL DEFAULT '1'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -87,7 +89,9 @@ CREATE TABLE IF NOT EXISTS `discountTypes` (
 
 CREATE TABLE IF NOT EXISTS `paymentTypes` (
   `id` int(11) NOT NULL,
-  `paymentType` text NOT NULL
+  `paymentType` text NOT NULL,
+  `modifier` int(11) DEFAULT NULL,
+  `percentage` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -151,8 +155,7 @@ CREATE TABLE IF NOT EXISTS `products` (
   `wholesale` decimal(9,2) NOT NULL DEFAULT '0.00',
   `taxable` tinyint(1) NOT NULL DEFAULT '0',
   `qoh` int(11) DEFAULT NULL,
-  `retail` decimal(9,2) NOT NULL DEFAULT '0.00',
-  `discountId` decimal(9,2) NOT NULL DEFAULT '0.00'
+  `retail` decimal(9,2) NOT NULL DEFAULT '0.00'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -163,7 +166,8 @@ CREATE TABLE IF NOT EXISTS `products` (
 
 CREATE TABLE IF NOT EXISTS `productsToGroups` (
   `productId` int(11) NOT NULL,
-  `productGroupId` int(11) NOT NULL
+  `productGroupId` int(11) NOT NULL,
+  `exclusive` tinyint(1) NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -176,9 +180,9 @@ CREATE TABLE IF NOT EXISTS `productsToTransactions` (
   `sku` varchar(50) NOT NULL,
   `transactionId` int(11) DEFAULT NULL,
   `quantity` int(11) DEFAULT NULL,
-  `discount` decimal(9,2) NOT NULL DEFAULT '0.00',
-  `discountType` int(11) DEFAULT NULL,
-  `originalPrice` decimal(9,2) NOT NULL DEFAULT '0.00'
+  `originalPrice` decimal(9,2) NOT NULL DEFAULT '0.00',
+  `actualPrice` decimal(9,2) NOT NULL DEFAULT '0.00',
+  `discounts` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -207,7 +211,7 @@ CREATE TABLE IF NOT EXISTS `transactions` (
   `customerId` int(11) DEFAULT NULL,
   `total` decimal(9,2) DEFAULT NULL,
   `time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `discountId` decimal(9,2) DEFAULT NULL,
+  `discounts` varchar(255) DEFAULT NULL,
   `paymentType` int(11) DEFAULT NULL,
   `transactionType` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;

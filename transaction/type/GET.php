@@ -45,6 +45,7 @@ $get_transactionids_query =
         t.date < :endDate AND
         tt.name = :transactionType";
 
+// TODO validate dates of transactions.
 $transactionIdsQuery = new Query($get_transactionids_query, array('startDate' => VALIDATE START DATE, 'endDate' => VALIDATE END DATE, 'transactionType' => VALIDATE TRANSACTION TYPE));
 $transactionIds = $transactionIdsQuery->results;
 //TODO all this might be able to be put into a helper and REQUIRE it in all endpoints
