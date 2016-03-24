@@ -7,10 +7,10 @@ require_once('customer.php');
 
 class Transaction extends Endpoint {
   /* Endpoint specific variables */
-  protected $transactionId;
-  protected $transactionType;
-  protected $transactionTypeId;
-  protected $transactionTypeEffect;
+  protected $id;
+  protected $type;
+  protected $typeId;
+  protected $typeEffect;
   protected $user; // TODO should be a user object.
   protected $customer; // TODO should be a customer object.
   protected $total;
@@ -97,14 +97,14 @@ class Transaction extends Endpoint {
     }
   }
 
-  public function set_transactionId($id) {
+  public function set_id($id) {
     $id = validate("id", $id, FILTER_VALIDATE_INT);
     if ($id) {
       $this->transactionId = $id;
     }
   }
 
-  public function set_transactionType($type) {
+  public function set_type($type) {
     if (is_string($type)) {
       $query = new Query("SELECT * FROM transactionTypes");
       $query->execute(array());
@@ -121,7 +121,7 @@ class Transaction extends Endpoint {
     }
   }
 
-  public function set_transactionTypeEffect($effect) {
+  public function set_typeEffect($effect) {
     $effect = intval($effect);
     $possibleValues(-1,0,1);
     if (in_array($effect, $possibleValues)) {

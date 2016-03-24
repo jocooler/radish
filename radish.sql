@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Mar 24, 2016 at 03:57 PM
+-- Generation Time: Mar 24, 2016 at 06:55 PM
 -- Server version: 5.6.28-0ubuntu0.15.10.1
 -- PHP Version: 5.6.11-1ubuntu3.1
 
@@ -129,12 +129,6 @@ CREATE TABLE IF NOT EXISTS `productGroups` (
 
 CREATE TABLE IF NOT EXISTS `productRecords` (
   `sku` varchar(50) NOT NULL,
-  `firstPurchased` datetime DEFAULT NULL,
-  `firstSold` datetime DEFAULT NULL,
-  `lastPurchased` datetime DEFAULT NULL,
-  `lastSold` datetime DEFAULT NULL,
-  `totalPurchased` int(11) DEFAULT NULL,
-  `totalSold` int(11) DEFAULT NULL,
   `reorderQuantity` int(11) DEFAULT NULL,
   `daysInStock` int(11) DEFAULT NULL,
   `lastUpdated` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -153,9 +147,11 @@ CREATE TABLE IF NOT EXISTS `products` (
   `manufacturer` varchar(100) DEFAULT NULL,
   `category` text,
   `wholesale` decimal(9,2) NOT NULL DEFAULT '0.00',
-  `taxable` tinyint(1) NOT NULL DEFAULT '0',
+  `retail` decimal(9,2) NOT NULL DEFAULT '0.00',
+  `taxable` tinyint(1) NOT NULL DEFAULT '1',
   `qoh` int(11) DEFAULT NULL,
-  `retail` decimal(9,2) NOT NULL DEFAULT '0.00'
+  `reorder` int(11) NOT NULL DEFAULT '0',
+  `updated` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------

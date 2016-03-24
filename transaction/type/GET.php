@@ -2,8 +2,9 @@
 class Get_Transaction extends Transaction {
   protected $get_query_string =
       "SELECT
-          t.transactionId,
-          tt.transactionType,
+          t.transactionId as id,
+          tt.transactionType as type,
+          tt.transactionTypeEffect as effect,
           u.name as clerk,
           c.name as customer,
           t.total,
@@ -35,7 +36,7 @@ class Get_Transaction extends Transaction {
 
 $get_transactionids_query =
     "SELECT
-        t.transactionId,
+        t.transactionId as id,
     FROM
         transactions t,
         transactionTypes tt

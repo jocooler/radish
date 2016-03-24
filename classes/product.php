@@ -1,6 +1,7 @@
 <?php
 require_once('helpers/functions.php');
 require_once('helpers/endpoint.php');
+require_once('helpers/discount.php');
 
 abstract class Product extends Endpoint {
   /* Endpoint specific variables */
@@ -40,6 +41,9 @@ abstract class Product extends Endpoint {
   }
 
   public function execute();
+  public function apply_discounts() {
+    // TODO apply discounts
+  }
 
   /* Validation Methods */
 

@@ -2,8 +2,9 @@
 class Get_Transaction extends Transaction {
   protected $get_query_string =
       "SELECT
-          t.transactionId,
-          tt.transactionType,
+          t.transactionId as id,
+          tt.transactionType as type,
+          tt.transactionTypeEffect as effect,
           u.name as clerk,
           c.name as customer,
           t.total,
@@ -24,7 +25,7 @@ class Get_Transaction extends Transaction {
           t.transactionId = :transactionId";
 
   public function execute() {
-    $this->query = new Query($this->get_query_string, array('transactionId' => $this->transactionId));
+    $this->query = new Query($this->get_query_string, array('transactionId' => $this->id));
     if (isset($this->query->results[0])){
       $this->set($this->query->results[0]);
     } else {

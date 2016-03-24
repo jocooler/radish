@@ -34,11 +34,13 @@ class Post_Product extends Product {
       );
 
       $this->query = new Query($post_query_string, $post_query_parameters);
+
+      //TODO error handling.
     }
   }
 }
 
-$request = new Request(array(), array('signature', 'timestamp'), false);
+$request = new Request(array(), array('signature', 'timestamp'), false); //TODO update this to use the new Request constructor.
 $product = new Post_Product($_POST['upc'], 'upc');
 $response = new Response(205, array('message'=>'product posted ok.', 'sku'=>$product->sku));
 $response->send();
