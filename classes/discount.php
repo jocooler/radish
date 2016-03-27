@@ -2,6 +2,33 @@
 class Discount {
   public $discountType;
   public $id;
+  private $group1;
+  private $group2;
+  private $discount;
+  private $percentage;
+  private $min;
+  private $max;
+  private $stackable;
+  private $automatic;
+  private $active;
+  /* Discounts need to work two ways:
+  1. Applied to products individually
+      float Discount(originalPrice, discountId);
+        retrieveDiscountData
+        validateProduct
+        applyDiscount
+  2. Applied to transaction total
+      float Discount(products, discountId)
+        retrieveDiscountData
+        computeDiscountableTotal
+        applyDiscount
+  3. Applied to products in the transaction
+      array Discount(products, discountId)
+        retrieveDiscountData
+        validateProducts
+        applyDiscounts
+  */
+
   /* kinds of discounts:
   x = product group of 1+ products
   z = discount
@@ -39,8 +66,8 @@ class Discount {
 
   public function apply($products) {
     //products: array(sku123=>array('product'=>Product->price, 'quantity'=>2))
-
   }
+
   public function execute($price) {
     return $price;
   }
