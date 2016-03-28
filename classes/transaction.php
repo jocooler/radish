@@ -14,6 +14,7 @@ class Transaction extends Endpoint {
   protected $user; // TODO should be a user object.
   protected $customer; // TODO should be a customer object.
   protected $total;
+  protected $final; //price after discounts. Initially set equal to total.
   protected $time;
   protected $discounts = array(); // array of Discounts
   protected $payment = array();

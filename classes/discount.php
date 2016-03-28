@@ -1,5 +1,5 @@
 <?php
-class Discount {
+class Discount extends Endpoint { // TODO endpoint extension
   public $discountType;
   public $id;
   private $group1;
@@ -11,23 +11,49 @@ class Discount {
   private $stackable;
   private $automatic;
   private $active;
-  /* Discounts need to work two ways:
-  1. Applied to products individually
-      float Discount(originalPrice, discountId);
-        retrieveDiscountData
-        validateProduct
-        applyDiscount
-  2. Applied to transaction total
-      float Discount(products, discountId)
-        retrieveDiscountData
-        computeDiscountableTotal
-        applyDiscount
-  3. Applied to products in the transaction
-      array Discount(products, discountId)
-        retrieveDiscountData
-        validateProducts
-        applyDiscounts
-  */
+
+  private $branch;
+
+  Discount::apply();
+
+  public function __construct($discountId = '') {
+    //retrieveDiscountData
+  }
+
+  private function apply_to_product($product) {
+    if (is_array($product)) {
+      foreach ($product as $p) {
+        $this->apply_to_product($p);
+      }
+    } else if (is_a($product, "Product")) {
+      $this->validate($product);
+      $product->price = $this->compute_new_price($product->price);
+    } else {
+      throw ("Discount::apply_to_product expects a product or array of products.");
+    }
+  }
+
+  private function apply_to_transaction_total($transaction) {
+    if (is_a($transaction, "Transaction")) {
+      // should we compute a discountable total?
+      // or should we apply it to all products that are discountable?
+      // Let's just be naive, because transaction dicounts can be applied only to the whole transaction.
+      $transaction->final = $this->compute_new_price($transaction->final);
+    } else {
+      throw ("Discount::apply_to_transaction_total expects a transaction.");
+    }
+  }
+
+  private function apply_to_valid_products($transaction) {
+    if (is_a($transaction, "Transaction")) {
+      $this->validate($transaction->products);
+      foreach ($transaction->products as $product_wrapper) {
+        $this->compute_new_price($product_wrapper['product']->price);
+      }
+    } else {
+      throw ("Discount::apply_to_valid_products expects a transaction.")
+    }
+  }
 
   /* kinds of discounts:
   x = product group of 1+ products
