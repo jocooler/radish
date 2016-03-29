@@ -1,100 +1,111 @@
 <?php
 class Discount extends Endpoint { // TODO endpoint extension
-  public $discountType;
-  public $id;
-  private $group1;
-  private $group2;
-  private $discount;
-  private $percentage;
-  private $min;
-  private $max;
-  private $stackable;
-  private $automatic;
-  private $active;
+  public $id;           // discount ID
+  private $group1;      // an array of product skus
+  private $group2;      // an array of product skus
+  private $discount;    // a number representing the discount
+  private $percentage;  // boolean flag. True = percentage. False = fixed.
+  private $min;         // minimum number to be applied
+  private $max;         // maximum times it can be applied
+  private $combinable;  // boolean flag. True = can be combined. False = can't.
+  private $stackable;   // can this coupon be used several times if the quantity thresholds are met more than once.
+  private $automatic;   // is the discount meant to be applied automatically or only with a coupon?
+  private $active;      // is the discount active?
 
-  private $branch;
-
-  Discount::apply();
+  private $valid = false; // does the discount meet all constraints?
 
   public function __construct($discountId = '') {
     //retrieveDiscountData
   }
 
-  private function apply_to_product($product) {
-    if (is_array($product)) {
-      foreach ($product as $p) {
-        $this->apply_to_product($p);
+  public function apply($target) {
+    if (is_a($target, "Product")) {
+      $this->apply_to_product($target);
+    } else if (is_a($target, "Transaction")) {
+      $this->apply_to_transaction($target);
+    } else if (is_array($target)) {
+      $this->apply_to_product_array($target);
+    }
+  }
+
+  private function apply_to_product(Product $product) {
+    $this->validate($product);
+    $product->price = $this->compute_new_price($product->price);
+  }
+
+  private function apply_to_transaction(Transaction $transaction) {
+    $discountable = $this->compute_discountable_total($transaction);
+    $transaction->final = $this->compute_new_price($discountable);
+  }
+
+  private function apply_to_product_array(array $products) { // takes in transaction->products
+    foreach ($products as $product_wrapper) {
+      if (!is_a($product_wrapper['product'], "Product")) {
+        throw ('Discount::apply_to_valid_products expects an array of products from $transaction->products.')
       }
-    } else if (is_a($product, "Product")) {
-      $this->validate($product);
-      $product->price = $this->compute_new_price($product->price);
-    } else {
-      throw ("Discount::apply_to_product expects a product or array of products.");
+    }
+    $this->validate($products);
+    foreach ($transaction->products as $product_wrapper) {
+      $this->compute_new_price($product_wrapper['product']->price);
     }
   }
 
-  private function apply_to_transaction_total($transaction) {
-    if (is_a($transaction, "Transaction")) {
-      // should we compute a discountable total?
-      // or should we apply it to all products that are discountable?
-      // Let's just be naive, because transaction dicounts can be applied only to the whole transaction.
-      $transaction->final = $this->compute_new_price($transaction->final);
-    } else {
-      throw ("Discount::apply_to_transaction_total expects a transaction.");
+  public function compute_new_price($price) {
+    /* This needs to be a decision tree. */
+    if (!$this->valid) {
+      return $price;
     }
-  }
+    /* kinds of discounts:
+    x = product group of 1+ products
+    z = discount
 
-  private function apply_to_valid_products($transaction) {
-    if (is_a($transaction, "Transaction")) {
-      $this->validate($transaction->products);
-      foreach ($transaction->products as $product_wrapper) {
-        $this->compute_new_price($product_wrapper['product']->price);
-      }
-    } else {
-      throw ("Discount::apply_to_valid_products expects a transaction.")
-    }
-  }
+    discounts can be either fixed or a percentage
+    */
 
-  /* kinds of discounts:
-  x = product group of 1+ products
-  z = discount
+    /* simple discounts:
+    x*(1-z) // 20% off each x
+    x-z     // $3 off each x
+    */
+    return $this->simple_percentage($price);
+    return $this->simple_fixed($price);
 
-  discounts can be either fixed or a percentage
+    /*
+    quantity discounts:
+    min x*(1-z) // 20% off each x if you buy min or more
+    min x-z*x   // $3 off each x if you buy min or more
+    min x-z     // $3 off if you buy x or more
+    */
+    return $this->simple_percentage($price);
+    return $this->simple_fixed($price);
 
-  Product Discounts
-  simple discounts:
-  x*(1-z) // 20% off each x
-  x-z     // $3 off each x
+    /*
+    bogo discounts:
+    buy min of x get x-z*x         // buy 2 get $3 off each additional one
+    buy min of x get x*(1-z)       // buy 2 get 20% off each additional one
+    buy min of x1 get x2-z*x2      // buy 2 of x1, get $3 off each x2
+    buy min of x1 get x2*(1-z)     // buy 2 of x1, get 20% off each x2
+    */
+    return $this->bogoFixed($price); //TODO how to apply this?
+    return $this->bogoPercentage($price);
+    // TODO probably add a counter and check if it's more than Min. If so, apply it.
 
-  quantity discounts:
-  min x*(1-z) // 20% off each x if you buy min or more
-  min x-z*x   // $3 off each x if you buy min or more
-  min x-z     // $3 off if you buy x or more
+    /*
+    bogo with limits
+    buy min of x get x-z*x limit     // buy 2 get $3 off each additional one up to the limit
+    buy min of x get x*(1-z) limit   // buy 2 get 20% off each additional one up to the limit
+    buy min of x1 get x2-z*x2 limit  // buy 2 of x1, get $3 off each x2 up to the limit
+    buy min of x1 get x2*(1-z) limit // buy 2 of x1, get 20% off each x2 up to the limit
+    */
 
-  bogo discounts:
-  buy min of x get x-z*x         // buy 2 get $3 off each additional one
-  buy min of x get x*(1-z)       // buy 2 get 20% off each additional one
-  buy min of x1 get x2-z*x2      // buy 2 of x1, get $3 off each x2
-  buy min of x1 get x2*(1-z)     // buy 2 of x1, get 20% off each x2
+    /*
+    bogo with stackable limits
+    same as bogo limits with a stackable flag.
+    */
 
-  bogo with limits
-  buy min of x get x-z*x limit     // buy 2 get $3 off each additional one up to the limit
-  buy min of x get x*(1-z) limit   // buy 2 get 20% off each additional one up to the limit
-  buy min of x1 get x2-z*x2 limit  // buy 2 of x1, get $3 off each x2 up to the limit
-  buy min of x1 get x2*(1-z) limit // buy 2 of x1, get 20% off each x2 up to the limit
-
-  bogo with stackable limits
-  same as bogo limits with a stackable flag.
-
-  I think we need these fields:
-  productGroup1, productGroup2, discount, discountType (percentage = true, fixed is false), minimum, limit/max, stackable
-  */
-
-  public function apply($products) {
-    //products: array(sku123=>array('product'=>Product->price, 'quantity'=>2))
-  }
-
-  public function execute($price) {
+    /*
+    I think we need these fields:
+    productGroup1, productGroup2, discount, discountType (percentage = true, fixed is false), minimum, limit/max, stackable
+    */
     return $price;
   }
 
