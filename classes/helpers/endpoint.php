@@ -10,7 +10,7 @@ abstract class Endpoint {
   protected $expected_parameters = array();
   protected $required_parameters = array();
 
-  public function execute();
+  abstract public function execute();
 
   public function __get($name) {
     // use this so that we can still fetch properties but can't set them directly.

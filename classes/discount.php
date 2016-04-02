@@ -17,6 +17,9 @@ class Discount extends Endpoint { // TODO endpoint extension
   public function __construct($discountId = '') {
     //retrieveDiscountData
   }
+  public function execute() {
+    
+  }
 
   public function apply($target) {
     if (is_a($target, "Product")) {
@@ -41,7 +44,7 @@ class Discount extends Endpoint { // TODO endpoint extension
   private function apply_to_product_array(array $products) { // takes in transaction->products
     foreach ($products as $product_wrapper) {
       if (!is_a($product_wrapper['product'], "Product")) {
-        throw ('Discount::apply_to_valid_products expects an array of products from $transaction->products.')
+        throw ('Discount::apply_to_valid_products expects an array of products from $transaction->products.');
       }
     }
     $this->validate($products);
