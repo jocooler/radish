@@ -24,7 +24,7 @@ abstract class Product extends Endpoint {
   protected $delete_query_string = "DELETE FROM products WHERE sku=:sku";
   protected $options_query_string = array(''); // TODO
 
-  protected $accessible_fields = array('category', 'manufacturer', 'name', 'qoh', 'retail', 'sku', 'taxable', 'upc', 'wholesale', 'discounts');
+  protected $accessible_fields = array('category', 'manufacturer', 'name', 'price', 'qoh', 'retail', 'sku', 'taxable', 'upc', 'wholesale', 'discounts');
 
   public function __construct ($identifier, $identifier_type) {
     switch ($identifier_type) {

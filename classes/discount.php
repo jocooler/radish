@@ -1,52 +1,85 @@
 <?php
 class Discount extends Endpoint {
   public $id;                   // discount ID
-  private $group1 = array();    // an array of product skus
-  private $group2 = array();    // an array of product skus
-  private $discount = 0;        // a number representing the discount
-  private $percentage = false;  // boolean flag. True = percentage. False = fixed.
-  private $min = 0;             // minimum number to be applied
-  private $max = 0;             // maximum times it can be applied
-  private $combinable = false;  // boolean flag. True = can be combined. False = can't.
-  private $stackable = false;   // can this coupon be used several times if the quantity thresholds are met more than once.
-  private $automatic = false;   // is the discount meant to be applied automatically or only with a coupon?
-  private $active = false;      // is the discount active?
+  protected $group1 = array();    // an array of product skus
+  protected $group2 = array();    // an array of product skus
+  protected $discount = 0;        // a number representing the discount
+  protected $percentage = false;  // boolean flag. True = percentage. False = fixed.
+  protected $floor = 0;           // minimum number to achieve the discount
+  protected $ceiling = 0;         // maximum that can be discounted
+  protected $gap = 0;             // number that don't get the discount (for bogo)
+  protected $combinable = false;  // boolean flag. True = can be combined. False = can't.
+  protected $stackable = false;   // can this coupon be used several times if the quantity thresholds are met more than once.
+  protected $automatic = false;   // is the discount meant to be applied automatically or only with a coupon?
+  protected $active = false;      // is the discount active?
 
-  private $valid = false; // does the discount meet all constraints?
+  public $target;        // holds the target object.
+  protected $valid = false; // does the discount meet all constraints?
   private $child;         // holds a reference to a child class with the discount methods.
 
-  public function __construct($discountId = false) {
-    if (!$discountId || is_array($discountId)) {
-      $this->updateDiscount($discountId);
-    } else {
-      $this->apply($discountId);
+  public function __construct($data = array()) {
+    // this constructor is for creating new discounts.
+    // call like $discount = new Discount();
+    if (count($data)) {
+      $this->set($data);
+    }
+  }
+
+  public static function init($id, $target) {
+    // this is the constructor for applying a discount
+    // call like $discount = Discount::init($id, $this);
+    // or $discount = Discount::init($id, $this->products[1223]['product']);
+    // TODO
+    // retrieveDiscountData
+    // figure out which kind it is from the database query.
+    $type = "Simple";
+    if ($results) {
+      $type = "Bogo";
+    } else if () {
+      $type = "Quantity";
     }
 
+    // construct a child of the proper type $child = new Simple_Discount();
+    $child = new $type."_Discount"($id, $target);
+    $child->set($results);
+    // return an instance of the child class
+    return $child;
   }
 
-  private function updateDiscount($data) {
-
-  }
   public function execute() {
     //TODO this is used in creating and updating discounts.
   }
 
-  private function apply() {
-    // TODO
-    // retrieveDiscountData
-    // construct a child of the proper type $child = new Discount_Blahblahblah;
-    $this->child->apply();
-  }
 
-  abstract private function validate();
-  abstract private function compute();
+  abstract public function validate();
+  abstract public function compute();
+
+  protected function discountProduct(Product $product, $amount = $this->discount, $percentage = $this->percentage) {
+    if ($percentage) {
+      $product->price = $product->price * $amount/100;
+    } else {
+      $product->price = $product->price - $amount;
+    }
+  }
 
   // TODO helper validations go in here.
   // called by children.
-  private function basicValidation() {
+  protected function basicValidation() {
     if ($this->active && $this->group1 && $this->discount) {
       return true;
     }
+    return false;
+  }
+
+  protected function targetValidation() {
+    if ($this->validTypes) {
+      foreach ($validTypes as $type) {
+        if (is_a($this->target, $type)) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 
 
@@ -151,23 +184,60 @@ class Discount extends Endpoint {
 }
 
 Class Simple_Discount extends Discount {
-  private $validTypes = ["Product", "Transaction"];
   // a simple discount takes a product group and a discount only.
-    //x-z     // $3 off each x
-    //x*(1-z) // 20% off each x
+  //x-z     // $3 off each x
+  //x*(1-z) // 20% off each x
+  private $validTypes = ["Product", "Transaction"];
+  public function __construct($id, $target) {
+    $this->set_id($id);
+    $this->target = $target;
+  }
+
+  public function apply() {
+    if (is_a($this->target, "Product")) {
+      if ($this->validate()) {
+        $this->discountProduct($this->target);
+      }
+    } else if (is_a($this->target, "Transaction")) {
+      foreach ($this->target->products as $productHolder) {
+        $product = $productHolder['product'];
+        if ($this->validate()) {
+          $this->discountProduct($product);
+        }
+      }
+    }
+  }
+
+  public function validate() {
+
+  }
+
 }
 
 Class Quantity_Discount extends Discount {
+  // floor x-z*x  (max) // $3 off each x if you buy min or more
+  // floor x-z  (max)   // $3 off if you buy x or more
+  // floor x*(1-z) (max)// 20% off each x if you buy min or more
   private $validTypes = ["Transaction"];
-  //min x-z*x   // $3 off each x if you buy min or more
-  //min x-z     // $3 off if you buy x or more
-  // min x*(1-z) // 20% off each x if you buy min or more
+
+  public function __construct($id, $target) {
+    $this->set_id($id);
+    $this->target = $target;
+  }
+
+  public function apply() {
+  }
+
+  public function validate() {
+
+  }
+
+
 }
 
 Class Bogo_Discount extends Discount {
-  private $validTypes = ["Transaction"];
   /*
-    buy min of x get x-z*x         // buy 2 get $3 off each additional one
+    buy floor of x get x-gap-z*x-gap         // buy 2 get $3 off each additional one
     buy min of x1 get x2-z*x2      // buy 2 of x1, get $3 off each x2
     buy min of x get x*(1-z)       // buy 2 get 20% off each additional one
     buy min of x1 get x2*(1-z)     // buy 2 of x1, get 20% off each x2
@@ -179,6 +249,20 @@ Class Bogo_Discount extends Discount {
 
     bogo with stackable limits
     same as bogo limits with a stackable flag.*/
+
+  private $validTypes = ["Transaction"];
+
+  public function __construct($id, $target) {
+    $this->set_id($id);
+    $this->target = $target;
+  }
+
+  public function apply() {
+  }
+
+  public function validate() {
+
+  }
 }
 
 ?>
