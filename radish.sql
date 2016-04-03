@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Mar 24, 2016 at 06:55 PM
+-- Generation Time: Apr 02, 2016 at 08:11 PM
 -- Server version: 5.6.28-0ubuntu0.15.10.1
 -- PHP Version: 5.6.11-1ubuntu3.1
 
@@ -59,26 +59,18 @@ CREATE TABLE IF NOT EXISTS `customers` (
 
 CREATE TABLE IF NOT EXISTS `discounts` (
   `id` int(11) NOT NULL,
+  `name` text,
   `group1` int(11) DEFAULT NULL,
   `group2` int(11) DEFAULT NULL,
   `discount` decimal(17,6) NOT NULL,
   `percentage` tinyint(1) NOT NULL DEFAULT '1',
-  `min` int(11) NOT NULL DEFAULT '0',
-  `max` int(11) NOT NULL DEFAULT '0',
+  `floor` int(11) NOT NULL DEFAULT '0',
+  `ceiling` int(11) NOT NULL DEFAULT '0',
+  `gap` int(11) DEFAULT NULL,
   `stackable` tinyint(1) NOT NULL DEFAULT '0',
+  `combinable` tinyint(1) NOT NULL DEFAULT '0',
   `automatic` tinyint(1) NOT NULL DEFAULT '0',
   `active` tinyint(1) NOT NULL DEFAULT '1'
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `discountTypes`
---
-
-CREATE TABLE IF NOT EXISTS `discountTypes` (
-  `id` int(11) NOT NULL,
-  `type` text
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -270,12 +262,6 @@ ALTER TABLE `customers`
 -- Indexes for table `discounts`
 --
 ALTER TABLE `discounts`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `discountTypes`
---
-ALTER TABLE `discountTypes`
   ADD PRIMARY KEY (`id`);
 
 --
