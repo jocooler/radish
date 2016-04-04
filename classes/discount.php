@@ -40,7 +40,7 @@ class Discount extends Endpoint {
     }
 
     // construct a child of the proper type $child = new Simple_Discount();
-    $child = new $type."_Discount"($id, $target);
+    $child = new $type."_Discount"($id, $target, $query);
     $child->set($results);
     // return an instance of the child class
     return $child;
@@ -269,29 +269,54 @@ Class Bogo_Discount extends Discount {
   private $possibleGroup1s = array();
   private $possibleGroup2s = array();
 
-  public function __construct($id, $target) {
+  public function __construct($id, $target, $query) {
     $this->set_id($id);
     $this->target = $target;
 
-    $this->possibleGroup1s = $this->checkInGroup($this->target->products, $this->group1);
-    $this->possibleGroup2s = $this->checkInGroup($this->target->products, $this->group2);
+    $this->set($query->results);
 
+    // TODO Query for groups 1 and 2.
+
+    $this->possibleGroup1s = $this->checkInGroup($this->target->products, $this->group1);
     $this->possibleGroup1s = usort($this->possibleGroup1s, array($this, "sortOnPrices"));
-    $this->possibleGroup2s = usort($this->possibleGroup2s, array($this, "sortOnPrices"));
+
+    if (count($this->group2 > 0)) {
+      $this->possibleGroup2s = $this->checkInGroup($this->target->products, $this->group2);
+      $this->possibleGroup2s = usort($this->possibleGroup2s, array($this, "sortOnPrices"));
+    }
   }
 
   public function apply() {
+    $nonDiscounted = array();
+    $numberOfApplications = 1;
     if (count($this->group2) > 0) {
       // discount all in group2 that are less than group1 up to limit
-    } else {
-      // discount all in group1 up to limit
 
+    } else {
+      // discount all in group1 up to ceiling
+
+      if ($this->stackable) {
+        $numberOfApplications = floor($this->possibleGroup1s / ($this->floor + $this->ceiling));
+        if ($this->possibleGroup1s % ($this->floor + $this->ceiling) > $this->floor) {
+          $numberOfApplications += 1;
+        }
+      }
+      
+      for ($i=0; $i<$numberOfApplications; $i++) {
+        for ($j=0; $j<$this->floor; $j++) {
+          // find the full-price items
+          $nonDiscounted[] = array_splice($possibleGroup1s, 0, 1);
+        }
+        for ($k=0; $k<$this->ceiling; $k++) {
+          $this->discountProduct(array_splice($possibleGroup1s, 0, 1));
+        }
+      }
     }
   }
 
   public function validate() {
     // meet the floor of items in group 1
-    // if there is  group 2, they have items in group two that are equal or lesser value
+    // if there is group2, they have items in group2 that are equal or lesser value
 
   }
 
