@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Apr 02, 2016 at 08:11 PM
+-- Generation Time: Apr 04, 2016 at 03:48 PM
 -- Server version: 5.6.28-0ubuntu0.15.10.1
 -- PHP Version: 5.6.11-1ubuntu3.1
 
@@ -66,7 +66,7 @@ CREATE TABLE IF NOT EXISTS `discounts` (
   `percentage` tinyint(1) NOT NULL DEFAULT '1',
   `floor` int(11) NOT NULL DEFAULT '0',
   `ceiling` int(11) NOT NULL DEFAULT '0',
-  `gap` int(11) DEFAULT NULL,
+  `bogo` tinyint(1) NOT NULL DEFAULT '0',
   `stackable` tinyint(1) NOT NULL DEFAULT '0',
   `combinable` tinyint(1) NOT NULL DEFAULT '0',
   `automatic` tinyint(1) NOT NULL DEFAULT '0',

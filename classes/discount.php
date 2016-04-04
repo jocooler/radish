@@ -7,7 +7,7 @@ class Discount extends Endpoint {
   protected $percentage = false;  // boolean flag. True = percentage. False = fixed.
   protected $floor = 0;           // minimum number to achieve the discount
   protected $ceiling = 0;         // maximum that can be discounted
-  protected $gap = 0;             // number that don't get the discount (for bogo)
+  protected $bogo = false;        // boolean flag are we doing a buy x get x?
   protected $combinable = false;  // boolean flag. True = can be combined. False = can't.
   protected $stackable = false;   // can this coupon be used several times if the quantity thresholds are met more than once.
   protected $automatic = false;   // is the discount meant to be applied automatically or only with a coupon?
@@ -33,9 +33,9 @@ class Discount extends Endpoint {
     // retrieveDiscountData
     // figure out which kind it is from the database query.
     $type = "Simple";
-    if ($results) {
+    if ($results['bogo']) {
       $type = "Bogo";
-    } else if () {
+    } else if (count($results['group1']) > 0) {
       $type = "Quantity";
     }
 
@@ -60,6 +60,10 @@ class Discount extends Endpoint {
     } else {
       $product->price = $product->price - $amount;
     }
+  }
+
+  protected function sortOnPrices(Product $a, Product $b) {
+    return $a->price - $b->price;
   }
 
   // TODO helper validations go in here.
@@ -271,16 +275,18 @@ Class Bogo_Discount extends Discount {
 
     $this->possibleGroup1s = $this->checkInGroup($this->target->products, $this->group1);
     $this->possibleGroup2s = $this->checkInGroup($this->target->products, $this->group2);
+
+    $this->possibleGroup1s = usort($this->possibleGroup1s, array($this, "sortOnPrices"));
+    $this->possibleGroup2s = usort($this->possibleGroup2s, array($this, "sortOnPrices"));
   }
 
   public function apply() {
     if (count($this->group2) > 0) {
-
+      // discount all in group2 that are less than group1 up to limit
     } else {
-      // discount all in group1 after gap up to limit
+      // discount all in group1 up to limit
 
     }
-
   }
 
   public function validate() {
