@@ -64,15 +64,14 @@ protected $quantity_update_query_string = "UPDATE products SET qoh = qoh + :quan
       $product['product']->applyDiscounts();
 
       $productsToTransactions_query->execute(array(
-        "sku" => $product['product']->sku,
+        "sku" => $product->sku,
         "transactionId" => $this->transactionId,
-        "quantity" => $product['quantity'],
-        "originalPrice" => $product['product']->retail,
-        "actualPrice" => $product['product']->price,
-        "discounts" => serialize($product['product']->discounts)
+        "originalPrice" => $product->retail,
+        "actualPrice" => $product->price,
+        "discounts" => serialize($product->discounts)
       ));
 
-      $quantity = $this->transactionTypeEffect * $product['quantity'];
+      $quantity = $this->transactionTypeEffect * 1;
 
       $quantity_update_query->execute(array("quantity"=>$quantity, "sku"=>$product['product']->sku));
     }

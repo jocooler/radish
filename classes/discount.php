@@ -82,6 +82,25 @@ class Discount extends Endpoint {
     return false;
   }
 
+  protected function checkInGroup(array $products, array $group) {
+    // determine if products is a list of products (multi-dimensional) or one dimensional
+    $foundProducts = array();
+    foreach ($products as $product) {
+      if (is_array($product)) { // if it's a product array
+        $sku = $product['product'];
+        if (in_array($sku->sku, $group)) {
+          for ($i = 0; $i < $product['quantity']; $i++) { // push single skus to the array as the quantity
+            array_push($foundProducts, $sku);
+          }
+        }
+      } else {
+        if (in_array($product->sku, $group)) {
+          array_push($foundProducts, $product);
+        }
+      }
+    }
+    return $foundProducts;
+  }
 
   public static function sort(array $discounts, array $products) {
     //discounts: array(Discount1, Discount2...)
@@ -178,6 +197,7 @@ class Discount extends Endpoint {
   public function set_automatic(bool $automatic) {
     $this->automatic = $automatic;
   }
+
   public function set_active(bool $active) {
     $this->active = $active;
   }
@@ -251,18 +271,33 @@ Class Bogo_Discount extends Discount {
     same as bogo limits with a stackable flag.*/
 
   private $validTypes = ["Transaction"];
+  private $possibleGroup1s = array();
+  private $possibleGroup2s = array();
 
   public function __construct($id, $target) {
     $this->set_id($id);
     $this->target = $target;
+
+    $this->possibleGroup1s = $this->checkInGroup($this->target->products, $this->group1);
+    $this->possibleGroup2s = $this->checkInGroup($this->target->products, $this->group2);
   }
 
   public function apply() {
+    if (count($this->group2) > 0) {
+
+    } else {
+      // discount all in group1 after gap up to limit
+
+    }
+
   }
 
   public function validate() {
+    // meet the floor of items in group 1
+    // if there is  group 2, they have items in group two that are equal or lesser value
 
   }
+
 }
 
 ?>

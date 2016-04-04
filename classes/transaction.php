@@ -84,17 +84,10 @@ class Transaction extends Endpoint {
 
   /* Validation Methods */
   public function set_products(array $products) {
-    //products arrive as array('id'=>array('type' => 'idType', 'quantity' => 'quantity'));
-    foreach ($products as $id=>$productData) {
-      if (!is_a($productData['product'], "Product")) {
-        $product = new Product($id, $productData['idType']);
-      }
-      if (array_key_exists($product->sku, $this->products)) {
-        $this->products[$product->sku]['quantity'] += $productData['quantity'];
-      } else {
-        $this->products[$product->sku]['product'] = $product;
-        $this->products[$product->sku]['quantity'] = $productData['quantity'];
-      }
+    //products arrive as array(array('type' => 'idType', 'id' => 'id0001'));
+    // TODO ensure everywhere uses the same format.
+    foreach ($products as $productData) {
+      $this->products[] = new Product($productData['id'], $productData['idType']);
     }
   }
 

@@ -4,7 +4,7 @@ class Compute_Transaction extends Transaction {
     $this->set($this->body);
 
     foreach ($this->products as $product) {
-      $product['product']->applyDiscounts();
+      $product->applyDiscounts();
     }
   }
 }
