@@ -86,17 +86,8 @@ class Discount extends Endpoint {
     // determine if products is a list of products (multi-dimensional) or one dimensional
     $foundProducts = array();
     foreach ($products as $product) {
-      if (is_array($product)) { // if it's a product array
-        $sku = $product['product'];
-        if (in_array($sku->sku, $group)) {
-          for ($i = 0; $i < $product['quantity']; $i++) { // push single skus to the array as the quantity
-            array_push($foundProducts, $sku);
-          }
-        }
-      } else {
-        if (in_array($product->sku, $group)) {
-          array_push($foundProducts, $product);
-        }
+      if (in_array($product->sku, $group)) {
+        array_push($foundProducts, $product);
       }
     }
     return $foundProducts;
@@ -164,7 +155,7 @@ class Discount extends Endpoint {
     }
   }
 
-  public set_discount($discount) {
+  public function set_discount($discount) {
     if (is_numeric($discount)) {
       $this->discount = $discount;
     }
