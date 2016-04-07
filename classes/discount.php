@@ -10,6 +10,7 @@ class Discount extends Endpoint {
   protected $bogo = false;        // boolean flag are we doing a buy x get x?
   protected $combinable = false;  // boolean flag. True = can be combined. False = can't.
   protected $stackable = false;   // can this coupon be used several times if the quantity thresholds are met more than once.
+  protected $max = 1;             // maximum times discount can be applied.
   protected $automatic = false;   // is the discount meant to be applied automatically or only with a coupon?
   protected $active = false;      // is the discount active?
 
@@ -252,18 +253,14 @@ Class Quantity_Discount extends Discount {
 
 Class Bogo_Discount extends Discount {
   /*
-    buy floor of x get x-gap-z*x-gap         // buy 2 get $3 off each additional one
-    buy min of x1 get x2-z*x2      // buy 2 of x1, get $3 off each x2
-    buy min of x get x*(1-z)       // buy 2 get 20% off each additional one
-    buy min of x1 get x2*(1-z)     // buy 2 of x1, get 20% off each x2
-
-    buy min of x get x-z*x limit     // buy 2 get $3 off each additional one up to the limit
-    buy min of x get x*(1-z) limit   // buy 2 get 20% off each additional one up to the limit
-    buy min of x1 get x2-z*x2 limit  // buy 2 of x1, get $3 off each x2 up to the limit
-    buy min of x1 get x2*(1-z) limit // buy 2 of x1, get 20% off each x2 up to the limit
-
-    bogo with stackable limits
-    same as bogo limits with a stackable flag.*/
+    BOGOs are identified by the $bogo flag.
+    The items that must be purchased are held in $group1.
+    The items that are discounted are held in $group2, or $group1, if $group2 is empty.
+    The minimum number of full-price items is held in $floor.
+    The number of discounted items is held in $ceiling.
+    If there is a $stackable flag, the discount can be applied more than once if there are qualifying items.
+    If there is a $max, it limits the number of times the discount can be applied (not the number of items). Requires $stackable.
+  */
 
   private $validTypes = ["Transaction"];
   private $possibleGroup1s = array();
@@ -289,27 +286,31 @@ Class Bogo_Discount extends Discount {
   public function apply() {
     $nonDiscounted = array();
     $numberOfApplications = 1;
-    if (count($this->group2) > 0) {
-      // discount all in group2 that are less than group1 up to limit
-
-    } else {
-      // discount all in group1 up to ceiling
-
+    if (count($this->group2) > 0) {// discount all in group2 that are less than group1 up to ceiling max number of times.
+      $buy = &$this->possibleGroup1s; // use a reference here so that any changes are reflected anywere.
+      $get = &$this->possibleGroup2s;
       if ($this->stackable) {
-        $numberOfApplications = floor($this->possibleGroup1s / ($this->floor + $this->ceiling));
-        if ($this->possibleGroup1s % ($this->floor + $this->ceiling) > $this->floor) {
+        $numberOfApplications = min(floor($buy/$this->floor), ceil($get/$this->ceiling, $this->max)); // the number of applications is the lesser of: the number of group1s/buy rounded down, OR the number of group2s/get rounded up, OR the max number of applications.
+      }
+    } else { // discount all in group1 up to ceiling
+      $buy = &$this->possibleGroup1s; // here it's very important to use a reference
+      $get = &$this->possibleGroup1s; // so that buy and get are the same internally.
+      if ($this->stackable) {
+        $numberOfApplications = floor($buy / ($this->floor + $this->ceiling)); // compute the number of complete applications we can do
+        if ($buy % ($this->floor + $this->ceiling) > $this->floor) {  // see if we can meet the "buy" requirements of another discount
           $numberOfApplications += 1;
         }
+        $numberOfApplications = min($this->max, $numberOfApplications); // check to be sure we're within the maximum number of applications
       }
-      
-      for ($i=0; $i<$numberOfApplications; $i++) {
-        for ($j=0; $j<$this->floor; $j++) {
-          // find the full-price items
-          $nonDiscounted[] = array_splice($possibleGroup1s, 0, 1);
-        }
-        for ($k=0; $k<$this->ceiling; $k++) {
-          $this->discountProduct(array_splice($possibleGroup1s, 0, 1));
-        }
+    }
+
+    for ($i=0; $i<$numberOfApplications; $i++) {  // apply the discount the number of times
+      for ($j=0; $j<$this->floor; $j++) { // find the "buy" items, put them in an array just for fun.
+        // since this array is sorted, we know it will be the most expensive items on top.
+        $nonDiscounted[] = array_splice($buy, 0, 1)[0];
+      }
+      for ($k=0; $k<$this->ceiling; $k++) { // discount the get items.
+        $this->discountProduct(array_splice($get, 0, 1)[0]);
       }
     }
   }
