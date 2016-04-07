@@ -1,6 +1,7 @@
 <?php
 class Discount extends Endpoint {
   // TODO come up with some iterative method to ensure that the best discount combination is applied.
+  // TODO figure out where we create product groups...it's probably somewhere on the discount endpoint but not using the discount class.
   // TODO we're not sorting discounts any more. So ensure that that is correct elsewhere.
   public $id;                     // discount ID
   protected $group1 = array();    // an array of product skus
@@ -21,21 +22,75 @@ class Discount extends Endpoint {
   public $target;        // holds the target object.
   private $child;         // holds a reference to a child class with the discount methods.
 
+  protected $query = "SELECT * FROM discounts WHERE id = :id";
+  protected $get_query_string = $this->query;
+  protected $post_query_string = "UPDATE `discounts` SET(
+    `name` = :name,
+    `group1` = :group1,
+    `group2` = :group2,
+    `discount` = :discount,
+    `percentage` = :percentage,
+    `floor` = :floor,
+    `ceiling` = :ceiling,
+    `bogo` = :bogo,
+    `stackable` = :stackable,
+    `max` = :max,
+    `combinable` = :combinable,
+    `automatic` = :automatic,
+    `active` = :active
+  ) WHERE `id` = :id ";
+  protected $put_query_string = "INSERT INTO `discounts`(
+    `id`,
+    `name`,
+    `group1`,
+    `group2`,
+    `discount`,
+    `percentage`,
+    `floor`,
+    `ceiling`,
+    `bogo`,
+    `stackable`,
+    `max`,
+    `combinable`,
+    `automatic`,
+    `active`
+  ) VALUES (
+    :id,
+    :name,
+    :group1,
+    :group2,
+    :discount,
+    :percentage,
+    :floor,
+    :ceiling,
+    :bogo,
+    :stackable,
+    :max,
+    :combinable,
+    :automatic,
+    :active
+  )";
+  protected $delete_query_string = "DELETE FROM discounts WHERE id = :id";
+  protected $options_query_string = "";
+  protected $accessible_fields = array('id', 'group1', 'group2', 'discount', 'percentage', 'floor', 'ceiling', 'bogo', 'combinable', 'stackable', 'max', 'automatic', 'active');
+
   public function __construct($data = array()) {
     // this constructor is for creating new discounts.
     // call like $discount = new Discount();
+    $this->retrieveDiscountData($data['id']);
     if (count($data)) {
       $this->set($data);
     }
+
+    $this->execute; // TODO remember to implement execute in each endpoint.
   }
 
   public static function init($id, $target) {
     // this is the constructor for applying a discount
     // call like $discount = Discount::init($id, $this);
-    // or $discount = Discount::init($id, $this->products[1223]['product']);
-    // TODO
-    // retrieveDiscountData
-    // figure out which kind it is from the database query.
+    // or $discount = Discount::init($id, $this->products[1]);
+
+    $results = $this->retrieveDiscountData($id);
     $type = "Simple";
     if ($results['bogo']) {
       $type = "Bogo";
@@ -49,8 +104,9 @@ class Discount extends Endpoint {
     return $child;
   }
 
-  public function execute() {
-    //TODO this is used in creating and updating discounts.
+  private function retrieveDiscountData($id = $this->id) {
+    $query = new Query($this->query, array('id'=>$id));
+    return $query->results;
   }
 
 
