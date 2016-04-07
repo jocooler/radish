@@ -1,8 +1,12 @@
 <?php
 class Discount extends Endpoint {
-  public $id;                   // discount ID
+  // TODO come up with some iterative method to ensure that the best discount combination is applied.
+  // TODO we're not sorting discounts any more. So ensure that that is correct elsewhere.
+  public $id;                     // discount ID
   protected $group1 = array();    // an array of product skus
+  protected $group1Exclusive = false;
   protected $group2 = array();    // an array of product skus
+  protected $group2Exclusive = false;
   protected $discount = 0;        // a number representing the discount
   protected $percentage = false;  // boolean flag. True = percentage. False = fixed.
   protected $floor = 0;           // minimum number to achieve the discount
@@ -41,7 +45,6 @@ class Discount extends Endpoint {
 
     // construct a child of the proper type $child = new Simple_Discount();
     $child = new $type."_Discount"($id, $target, $query);
-    $child->set($results);
     // return an instance of the child class
     return $child;
   }
@@ -61,13 +64,14 @@ class Discount extends Endpoint {
       $product->price -= $amount;
     }
     $product->price = max($product->price, 0); // ensure the price is above 0 for sanity.
+    $product->discounts[] = $this->id;
   }
 
   protected function sortOnPrices(Product $a, Product $b) {
     return $a->price - $b->price;
   }
 
-  // TODO helper validations go in here.
+  // helper validations go in here.
   // called by children.
   protected function basicValidation() {
     if ($this->active && $this->group1 && $this->discount) {
@@ -98,47 +102,14 @@ class Discount extends Endpoint {
     return true;
   }
 
-  protected function checkInGroup(array $products, array $group) {
-    // determine if products is a list of products (multi-dimensional) or one dimensional
+  protected function checkInGroup(array $products, array $group, $exclusive = false) {
     $foundProducts = array();
     foreach ($products as $product) {
-      if (in_array($product->sku, $group)) {
+      if (in_array($product->sku, $group) === $exclusive) { // true if both are true or both are false.
         array_push($foundProducts, $product);
       }
     }
     return $foundProducts;
-  }
-
-  public static function sort(array $discounts, array $products) {
-    //discounts: array(Discount1, Discount2...)
-    //products: array(sku123=>array('product'=>Product->price, 'quantity'=>2))
-    foreach ($discounts as $discount) {
-      // we need to figure out the order in which to apply discounts.
-      // I think it's:
-      // products fixed, highest to low
-      // products percentage, highest to low
-      // transaction fixed, highest to low
-      // transaction percentage, high to low
-      // user fixed, high to low
-      // user percentage, high to low
-      // bogo needs to check value of items.
-
-      /* more accurately:
-      1. Count how many products each discount applies to.
-        a. get the group number for each discount.
-        b. select * from productsToGroups where sku = Product->sku AND groups IN (each discount group number)
-        c. TODO: some discounts may not be combined. This should be taken into account.
-        TODO maybe we need a super field for things like employee discounts that can be combined potentially even if others cannot.
-        TODO super discounts might include a birthday discount off of a sale item.
-        TODO maybe we need to rethink birthday money as a payment and not as a discount.
-      2. If there are ties
-        a. percentages first
-          i. sort percentages descending
-        b. fixed next
-          i. sort fixed descending
-      */
-
-    }
   }
 
   public function set_id($id) {
@@ -159,9 +130,10 @@ class Discount extends Endpoint {
         $this->group = $group;
       }
     } else {
-      $groupQuery = "SELECT productId FROM productsToGroups WHERE productGroupId = :groupId";
+      $groupQuery = "SELECT productId, exclusive FROM productsToGroups WHERE productGroupId = :groupId";
       $query = new Query($groupQuery, array('groupId'=>$group));
-      $this->set_group1($query->results);
+      $this->set_group1($query->results['productId']);
+      $this->group1Exclusive = $query->results['exclusive'];
     }
   }
 
@@ -177,9 +149,10 @@ class Discount extends Endpoint {
         $this->group = $group;
       }
     } else {
-      $groupQuery = "SELECT productId FROM productsToGroups WHERE productGroupId = :groupId";
+      $groupQuery = "SELECT productId, exclusive FROM productsToGroups WHERE productGroupId = :groupId";
       $query = new Query($groupQuery, array('groupId'=>$group));
-      $this->set_group2($query->results);
+      $this->set_group2($query->results['productId']);
+      $this->group2Exclusive = $query->results['exclusive'];
     }
   }
 
@@ -223,9 +196,6 @@ class Discount extends Endpoint {
 }
 
 Class Simple_Discount extends Discount {
-  // a simple discount takes a product group and a discount only.
-  //x-z     // $3 off each x
-  //x*(1-z) // 20% off each x
   private $validTypes = ["Product", "Transaction"];
   private $products = array();
 
@@ -242,7 +212,7 @@ Class Simple_Discount extends Discount {
       }
     }
 
-    $this->products = $this->checkInGroup($this->products, $this->group1);
+    $this->products = $this->checkInGroup($this->products, $this->group1, $this->group1Exclusive);
     $this->products = usort($this->products, array($this, "sortOnPrices"));
   }
 
@@ -280,7 +250,7 @@ Class Quantity_Discount extends Discount {
     $this->target = $target;
     $this->set($query->results);
 
-    $this->possibleGroup1s = $this->checkInGroup($this->target->products, $this->group1);
+    $this->possibleGroup1s = $this->checkInGroup($this->target->products, $this->group1, $this->group1Exclusive);
     $this->possibleGroup1s = usort($this->possibleGroup1s, array($this, "sortOnPrices"));
 
   }
@@ -328,11 +298,11 @@ Class Bogo_Discount extends Discount {
 
     $this->set($query->results);
 
-    $this->possibleGroup1s = $this->checkInGroup($this->target->products, $this->group1);
+    $this->possibleGroup1s = $this->checkInGroup($this->target->products, $this->group1, $this->group1Exclusive);
     $this->possibleGroup1s = usort($this->possibleGroup1s, array($this, "sortOnPrices"));
 
     if (count($this->group2 > 0)) {
-      $this->possibleGroup2s = $this->checkInGroup($this->target->products, $this->group2);
+      $this->possibleGroup2s = $this->checkInGroup($this->target->products, $this->group2, $this->group2Exclusive);
       $this->possibleGroup2s = usort($this->possibleGroup2s, array($this, "sortOnPrices"));
     }
   }
