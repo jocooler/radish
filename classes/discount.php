@@ -136,27 +136,39 @@ class Discount extends Endpoint {
     }
   }
 
-  public function set_group1(array $group1) {
-    $valid = true;
-    foreach ($group1 as $productId) {
-      if (!is_int($productId)) {
-        $valid = false;
+  public function set_group1($group) {
+    if (is_array($group)) {
+      $valid = true;
+      foreach ($group as $key=>$productId) {
+        if (!is_int($productId)) {
+          $valid = false;
+        }
       }
-    }
-    if ($valid) {
-      $this->group1 = $group1;
+      if ($valid) {
+        $this->group = $group;
+      }
+    } else {
+      $groupQuery = "SELECT productId FROM productsToGroups WHERE productGroupId = :groupId";
+      $query = new Query($groupQuery, array('groupId'=>$group));
+      $this->set_group1($query->results);
     }
   }
 
-  public function set_group2(array $group1) {
-    $valid = true;
-    foreach ($group2 as $productId) {
-      if (!is_int($productId)) {
-        $valid = false;
+  public function set_group2($group) {
+    if (is_array($group)) {
+      $valid = true;
+      foreach ($group as $key=>$productId) {
+        if (!is_int($productId)) {
+          $valid = false;
+        }
       }
-    }
-    if ($valid) {
-      $this->group1 = $group2;
+      if ($valid) {
+        $this->group = $group;
+      }
+    } else {
+      $groupQuery = "SELECT productId FROM productsToGroups WHERE productGroupId = :groupId";
+      $query = new Query($groupQuery, array('groupId'=>$group));
+      $this->set_group1($query->results);
     }
   }
 
@@ -271,8 +283,6 @@ Class Bogo_Discount extends Discount {
     $this->target = $target;
 
     $this->set($query->results);
-
-    // TODO Query for groups 1 and 2.
 
     $this->possibleGroup1s = $this->checkInGroup($this->target->products, $this->group1);
     $this->possibleGroup1s = usort($this->possibleGroup1s, array($this, "sortOnPrices"));
