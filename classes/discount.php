@@ -15,7 +15,6 @@ class Discount extends Endpoint {
   protected $active = false;      // is the discount active?
 
   public $target;        // holds the target object.
-  protected $valid = false; // does the discount meet all constraints?
   private $child;         // holds a reference to a child class with the discount methods.
 
   public function __construct($data = array()) {
@@ -57,10 +56,11 @@ class Discount extends Endpoint {
 
   protected function discountProduct(Product $product, $amount = $this->discount, $percentage = $this->percentage) {
     if ($percentage) {
-      $product->price = $product->price * $amount/100;
+      $product->price -= $product->price * $amount/100;
     } else {
-      $product->price = $product->price - $amount;
+      $product->price -= $amount;
     }
+    $product->price = max($product->price, 0); // ensure the price is above 0 for sanity.
   }
 
   protected function sortOnPrices(Product $a, Product $b) {
@@ -85,6 +85,17 @@ class Discount extends Endpoint {
       }
     }
     return false;
+  }
+
+  protected function checkCombinable($group) {
+    if (!$this->combinable) {
+      foreach ($group as $elementKey => $product) {
+        if ($product->price !== $product->retail) {
+          unset($group[$elementKey]);
+        }
+      }
+    }
+    return true;
   }
 
   protected function checkInGroup(array $products, array $group) {
@@ -168,7 +179,7 @@ class Discount extends Endpoint {
     } else {
       $groupQuery = "SELECT productId FROM productsToGroups WHERE productGroupId = :groupId";
       $query = new Query($groupQuery, array('groupId'=>$group));
-      $this->set_group1($query->results);
+      $this->set_group2($query->results);
     }
   }
 
@@ -216,48 +227,81 @@ Class Simple_Discount extends Discount {
   //x-z     // $3 off each x
   //x*(1-z) // 20% off each x
   private $validTypes = ["Product", "Transaction"];
-  public function __construct($id, $target) {
+  private $products = array();
+
+  public function __construct($id, $target, $query) {
     $this->set_id($id);
     $this->target = $target;
+    $this->set($query->results);
+
+    if (is_a($this->target, "Product")) { // it's a single product
+      $this->products[] = $this->target;
+    } else if (is_a($this->target, "Transaction") && $this->percentage && !$this->combinable) { // it's percentage discount to be applied to every non-discounted product.
+      foreach ($this->target->products as $product) {
+        $this->products[] = $product;
+      }
+    }
+
+    $this->products = $this->checkInGroup($this->products, $this->group1);
+    $this->products = usort($this->products, array($this, "sortOnPrices"));
   }
 
   public function apply() {
-    if (is_a($this->target, "Product")) {
-      if ($this->validate()) {
-        $this->discountProduct($this->target);
+    if (!$this->validate) {
+      return false;
+    }
+    if (count($this->products)) { // discount all the products.
+      foreach ($this->products as $product) {
+        $this->discountProduct($product);
       }
-    } else if (is_a($this->target, "Transaction")) {
-      foreach ($this->target->products as $productHolder) {
-        $product = $productHolder['product'];
-        if ($this->validate()) {
-          $this->discountProduct($product);
-        }
+    } else {
+      if ($this->percentage) {
+        $this->target->final -= $this->target->final * $this->discount/100;
+      } else {
+        $this->target->final -= $this->discount;
       }
+      $this->target->final = max($this->target->final, 0); // ensure that the total doesn't go below 0, because that's nonsensical.
     }
   }
 
   public function validate() {
-
+    if ($this->targetValidation() && $this->basicValidation() && $this->checkCombinable(&$this->products)) {
+      return true;
+    }
   }
 
 }
 
 Class Quantity_Discount extends Discount {
-  // floor x-z*x  (max) // $3 off each x if you buy min or more
-  // floor x-z  (max)   // $3 off if you buy x or more
-  // floor x*(1-z) (max)// 20% off each x if you buy min or more
   private $validTypes = ["Transaction"];
 
-  public function __construct($id, $target) {
+  public function __construct($id, $target, $query) {
     $this->set_id($id);
     $this->target = $target;
+    $this->set($query->results);
+
+    $this->possibleGroup1s = $this->checkInGroup($this->target->products, $this->group1);
+    $this->possibleGroup1s = usort($this->possibleGroup1s, array($this, "sortOnPrices"));
+
   }
 
   public function apply() {
+    if (!$this->validate) {
+      return false;
+    }
+    $max = min($this->max, count($possibleGroup1s));
+    for ($i=0; $i<$max; $i++) {
+      $this->discountProduct($possibleGroup1s[$i]);
+    }
   }
 
   public function validate() {
-
+    if ($this->targetValidation() &&
+        $this->basicValidation() &&
+        $this->checkCombinable(&$this->possibleGroup1s) &&
+        count($this->possibleGroup1s) > $this->floor) {
+      return true;
+    }
   }
 
 
@@ -314,7 +358,7 @@ Class Bogo_Discount extends Discount {
       }
     }
 
-    for ($i=0; $i<$numberOfApplications; $i++) {  // apply the discount the number of times
+    for ($i=0; $i<$numberOfApplications && count($buy)>=$this->floor; $i++) {  // apply the discount the number of times, if the number of by items is ok
       for ($j=0; $j<$this->floor; $j++) { // find the "buy" items, put them in an array just for fun.
         // since this array is sorted, we know it will be the most expensive items on top.
         $product = array_splice($buy, 0, 1)[0]
@@ -337,9 +381,12 @@ Class Bogo_Discount extends Discount {
   }
 
   public function validate() {
-    // meet the floor of items in group 1
-    // if there is group2, they have items in group2 that are equal or lesser value
-
+    if ($this->targetValidation() &&
+        $this->basicValidation() &&
+        $this->checkCombinable(&$this->possibleGroup1s) &&
+        $this->checkCombinable(&$this->possibleGroup2s)) {
+      return true;
+    }
   }
 
 }

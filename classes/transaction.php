@@ -19,7 +19,7 @@ class Transaction extends Endpoint {
   protected $discounts = array(); // array of Discounts
   protected $payment = array();
 
-  protected $products = array(); // array(sku123=>array('product'=>Product, 'quantity'=>2))
+  protected $products = array(); // array([]=>product) //TODO ensure everwhere uses this change.
 
   /* Template SQL Queries. These are for example only, please reimplement in each endpoint. */
   protected $query;
