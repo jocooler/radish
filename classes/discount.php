@@ -307,10 +307,21 @@ Class Bogo_Discount extends Discount {
     for ($i=0; $i<$numberOfApplications; $i++) {  // apply the discount the number of times
       for ($j=0; $j<$this->floor; $j++) { // find the "buy" items, put them in an array just for fun.
         // since this array is sorted, we know it will be the most expensive items on top.
-        $nonDiscounted[] = array_splice($buy, 0, 1)[0];
+        $product = array_splice($buy, 0, 1)[0]
+        $nonDiscounted[] = $product;
+        $max_price = $product->price;
       }
       for ($k=0; $k<$this->ceiling; $k++) { // discount the get items.
-        $this->discountProduct(array_splice($get, 0, 1)[0]);
+        $discounted_product = array_splice($get, 0, 1)[0];
+        while ($discountedProduct->price > $max_price && count($get) > 0) { // If the price is more than the max price, go through the list until one is cheaper.
+          $discounted_product = array_splice($get, 0, 1)[0];
+        }
+        if ($dicounted_product->price <= $max_price) { // ensure that the price is less than the max_price.
+          $this->discountProduct($discounted_product);
+        }
+      }
+      if (count($buy) < 1 || count($get) < 1) { // we ran out of products and can quit.
+        break;
       }
     }
   }
