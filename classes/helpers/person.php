@@ -2,7 +2,7 @@
 require_once('helpers/functions.php');
 require_once('helpers/endpoint.php');
 
-class Person extends Endpoint {
+abstract class Person extends Endpoint {
   protected $id;
   protected $first;
   protected $last;
@@ -16,6 +16,22 @@ class Person extends Endpoint {
   protected $email;
   protected $discounts = array();
   protected $accessibleFields = array('id', 'first', 'last', 'birthday', 'address', 'address2', 'city', 'state', 'zip', 'phone', 'email', 'discounts');
+
+  public function __construct($id) {
+    if (is_array($id)) {
+      $this->set($id); // set all variables
+      $this->post_construction($id);
+    } else if ($id) {
+      $this->set_id('id');
+      $query = new Query($this->get_query_string, array('id' => $this->id));
+      $this->set($query->results);
+      $this->post_construction($query->results);
+    }
+  }
+
+  public function post_construction($args) { // this is implemented by children if it's needed.
+
+  }
 
   /* Validation Methods */
   public function set_id($id) {
