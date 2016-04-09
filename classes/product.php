@@ -46,6 +46,7 @@ abstract class Product extends Endpoint {
   }
 
   /* Validation Methods */
+  // TODO we need to change these to not use the filter_validate stuff - I think it's unnecessary for this case.
 
   public function set_sku($sku) {
     //TODO: Validate sku
