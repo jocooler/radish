@@ -15,7 +15,7 @@ class Person extends Endpoint {
   protected $phone;
   protected $email;
   protected $discounts = array();
-  protected $accessibleFields = array();
+  protected $accessibleFields = array('id', 'first', 'last', 'birthday', 'address', 'address2', 'city', 'state', 'zip', 'phone', 'email', 'discounts');
 
   /* Validation Methods */
   public function set_id($id) {
