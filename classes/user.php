@@ -7,6 +7,10 @@ class User extends Person {
   protected $salt;
   protected $passphrase;
   protected $username;
+  private $passwordLength = 128;
+  private $saltLength = 16;
+  private $usernameMinLength = 8;
+  private $passphraseWords = 6;
 
 
   protected $query = "";
@@ -27,6 +31,38 @@ class User extends Person {
       $this->set_userGroup($args['userGroup']);
     }
   }
+
+
+  public function hash_password($password) {
+    return hash_pbkdf2('sha_512', $password, $this->salt, 64000, $this->passwordLength);
+  }
+
+  public function compare_password($password) {
+    // TODO update security to use this.
+    if ($this->hash_password($password) === $this->password) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  public function generate_passphrase() {
+    // TODO use Paragonie for better rand, perhaps.
+    $passphrase = array();
+    $file = new SplFileObject(dirname(dirname(__FILE__)) . 'assets/diceware.list');
+    for ($i=0; $i<=$this->passphraseWords; $i++) {
+      $rand = rand(1, 7777);
+      $file->seek($rand);
+      $passphrase[] = $file->current();
+    }
+
+    $passphrase = implode(' ', $passphrase);
+  }
+
+  public function compare_passphrase() {
+
+  }
+
   /* Validation Methods  - These are mostly in Person.php */
 
   public function set_userGroup($group) {
@@ -41,5 +77,31 @@ class User extends Person {
       //TODO error handling
     }
   }
+
+  public function set_password($password) {
+    if (strlen($password) === $this->passwordLength) {
+      $this->password = $password;
+    }
+  }
+
+  public function set_salt($salt) {
+    if (strlen($salt) === $saltLength) { // salts are a minimum of 16 characters.
+      $this->salt = $salt;
+    }
+    //TODO make it so that it will use the salt once and then update it to use the new length.
+  }
+
+  public function set_passphrase($passphrase) {
+    if (strlen($passphrase) < $this->passphraseWords * 3) {
+      $this->passphrase = $passphrase;
+    }
+  }
+
+  public function set_username($username) {
+    if (strlen($username) >= $this->usernameMinLength) {
+      $this->username = $username;
+    }
+  }
+
 }
 ?>
