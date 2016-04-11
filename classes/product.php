@@ -115,10 +115,13 @@ abstract class Product extends Endpoint {
       }
       return false; // don't do what's after this if we're an array.
     }
-    if (!is_a($discount, "Discount")) {
-      $discount = new Discount($discount);
+    if ($discount) {
+      print_r($discount);
+      if (!is_a($discount, "Discount")) {
+        $discount = Discount::init($discount, $this);
+      }
+      $this->discounts[] = $discount;
     }
-    $this->discounts[] = $discount;
   }
 
 }

@@ -23,7 +23,7 @@ class Discount extends Endpoint {
   private $child;         // holds a reference to a child class with the discount methods.
 
   protected $query = "SELECT * FROM discounts WHERE id = :id";
-  protected $get_query_string = $this->query;
+  protected $get_query_string = "SELECT * FROM discounts WHERE id = :id";
   protected $post_query_string = "UPDATE `discounts` SET(
     `name` = :name,
     `group1` = :group1,
@@ -99,21 +99,32 @@ class Discount extends Endpoint {
     }
 
     // construct a child of the proper type $child = new Simple_Discount();
-    $child = new $type."_Discount"($id, $target, $query);
+    $className = $type."_Discount";
+    $child = new $className($id, $target, $query);
     // return an instance of the child class
     return $child;
   }
 
-  private function retrieveDiscountData($id = $this->id) {
+  private function retrieveDiscountData($id = '') {
+    if (is_null($id)) {
+      $id = $this->id;
+    }
     $query = new Query($this->query, array('id'=>$id));
     return $query->results;
   }
 
 
-  abstract public function validate();
-  abstract public function compute();
+  public function validate() {
 
-  protected function discountProduct(Product $product, $amount = $this->discount, $percentage = $this->percentage) {
+  }
+  public function compute() {
+
+  }
+  public function execute() {
+
+  }
+
+  protected function discountProduct(Product $product) {
     if ($percentage) {
       $product->price -= $product->price * $amount/100;
     } else {
@@ -147,7 +158,7 @@ class Discount extends Endpoint {
     return false;
   }
 
-  protected function checkCombinable($group) {
+  protected function checkCombinable(&$group) {
     if (!$this->combinable) {
       foreach ($group as $elementKey => $product) {
         if ($product->price !== $product->retail) {
@@ -291,7 +302,7 @@ Class Simple_Discount extends Discount {
   }
 
   public function validate() {
-    if ($this->targetValidation() && $this->basicValidation() && $this->checkCombinable(&$this->products)) {
+    if ($this->targetValidation() && $this->basicValidation() && $this->checkCombinable($this->products)) {
       return true;
     }
   }
@@ -324,7 +335,7 @@ Class Quantity_Discount extends Discount {
   public function validate() {
     if ($this->targetValidation() &&
         $this->basicValidation() &&
-        $this->checkCombinable(&$this->possibleGroup1s) &&
+        $this->checkCombinable($this->possibleGroup1s) &&
         count($this->possibleGroup1s) > $this->floor) {
       return true;
     }
@@ -387,7 +398,7 @@ Class Bogo_Discount extends Discount {
     for ($i=0; $i<$numberOfApplications && count($buy)>=$this->floor; $i++) {  // apply the discount the number of times, if the number of by items is ok
       for ($j=0; $j<$this->floor; $j++) { // find the "buy" items, put them in an array just for fun.
         // since this array is sorted, we know it will be the most expensive items on top.
-        $product = array_splice($buy, 0, 1)[0]
+        $product = array_splice($buy, 0, 1)[0];
         $nonDiscounted[] = $product;
         $max_price = $product->price;
       }
@@ -409,8 +420,8 @@ Class Bogo_Discount extends Discount {
   public function validate() {
     if ($this->targetValidation() &&
         $this->basicValidation() &&
-        $this->checkCombinable(&$this->possibleGroup1s) &&
-        $this->checkCombinable(&$this->possibleGroup2s)) {
+        $this->checkCombinable($this->possibleGroup1s) &&
+        $this->checkCombinable($this->possibleGroup2s)) {
       return true;
     }
   }

@@ -97,9 +97,9 @@ Sample request and response:
 
 /source (manufacturers and reps)
   GET
+  POST
   OPTIONS
-  /manufacturer/{NAME};{NAME}
-  /rep/{NAME};{NAME}
+  /{NAME};{NAME}
     GET
     PUT
     DELETE
@@ -129,8 +129,6 @@ DELETE - remove data
 HEAD - get metadata without fetching the body
 OPTIONS - what methods am I allowed to do?
 POST - allow the server to put the data on the server where it wants to. Not idempotent (4x2 !== 4x2x2)
-
-Response times: 0.1 seconds offsite, 0.06 onsite.
 
 Authentication:
 Realms allow GET on each endpoint.
