@@ -21,7 +21,7 @@ class Query {
     $this->user = $credentials['user'];
     $this->password = $credentials['password'];
     $this->database = $credentials['database'];
-    
+
     $this->query = $query;
     $this->connection = $this->connect_db();
     $this->connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION); // TODO might want to remove this for production
@@ -47,12 +47,18 @@ class Query {
     $this->parameters = $parameters;
     try {
       $this->statement->execute($this->parameters);
-      $this->results = $this->statement->fetchAll();
+        if (strpos($this->query, 'UPDATE') !== 0 && strpos($this->query, 'INSERT')  !== 0) {
+          $this->results = $this->statement->fetchAll(PDO::FETCH_ASSOC);
+        }
       return $this->results;
     } catch (PDOException $e) {
       // TODO proper db error handling.
       echo 'Failure: ' . $e->getMessage();
     }
+  }
+
+  public function lastId() {
+    return $this->connection->lastInsertId();
   }
 }
 ?>
