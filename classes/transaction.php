@@ -155,6 +155,12 @@ class Transaction extends Endpoint {
       }
       $this->discounts[] = $discount;
     }
+    // automatically grab any discounts.
+    $auto_discounts_query = "SELECT id FROM discounts WHERE automatic = 1";
+    $auto_discounts = new Query($auto_discounts_query);
+    foreach ($auto_discounts->results as $auto) {
+      $this->set_discounts($auto['id']);
+    }
   }
 
   public function set_payment($payment) {
