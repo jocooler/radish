@@ -35,7 +35,9 @@ abstract class Person extends Endpoint {
 
   /* Validation Methods */
   public function set_id($id) {
-    $this->id = $id;
+    if (is_int($id)) {
+      $this->id = $id;
+    }
   }
 
   public function set_first($first) {

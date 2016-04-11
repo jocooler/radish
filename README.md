@@ -7,9 +7,9 @@ Status:
 * /transactions is done
 
 Deck:
-* Source class
 * Discount Endpoints, including product groups.
-* User class
+* User endpoints
+* Customer endpoints
 
 By decoupling the database/API layer from the front end, we create a system designed to extend and integrate and "play nice" with other products. The aim of this project is to offer a variety of UIs and consumers for the API to make it easy to integrate with websites and existing tools.
 
