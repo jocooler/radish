@@ -35,6 +35,7 @@ class Response {
     }
   }
   private function construct_from_data(array $data) {
+    // TODO maybe these need to convert null to a null array?
     $this->data = $data;
     $this->set_header(200);
     $this->set_body();
