@@ -8,7 +8,6 @@ class User extends Person {
   protected $passphrase;
   protected $username;
   private $passwordLength = 128;
-  private $saltLength = 16;
   private $usernameMinLength = 8;
   private $passphraseWords = 6;
 
@@ -57,10 +56,13 @@ class User extends Person {
     }
 
     $passphrase = implode(' ', $passphrase);
+    $this->set_passphrase($passphrase);
+    return $passphrase;
   }
 
-  public function compare_passphrase() {
-
+  public function generate_salt() {
+    $salt = md5($this->generate_passphrase());
+    return $salt;
   }
 
   /* Validation Methods  - These are mostly in Person.php */
@@ -85,10 +87,9 @@ class User extends Person {
   }
 
   public function set_salt($salt) {
-    if (strlen($salt) === $saltLength) { // salts are a minimum of 16 characters.
+    if (strlen($salt) === 32) { // salts are an md5 hash, so 32 chars.
       $this->salt = $salt;
     }
-    //TODO make it so that it will use the salt once and then update it to use the new length.
   }
 
   public function set_passphrase($passphrase) {
