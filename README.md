@@ -7,9 +7,10 @@ Status:
 * /transactions is done
 
 Deck:
-* Discount Endpoints, including product groups.
+* Discount Endpoints
 * User endpoints
 * Customer endpoints
+* Add productGroup to the product class to insert into DB from there.
 
 By decoupling the database/API layer from the front end, we create a system designed to extend and integrate and "play nice" with other products. The aim of this project is to offer a variety of UIs and consumers for the API to make it easy to integrate with websites and existing tools.
 
