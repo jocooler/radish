@@ -1,4 +1,5 @@
 <?php
+require_once('helpers/endpoint.php');
 class Discount extends Endpoint {
   // TODO come up with some iterative method to ensure that the best discount combination is applied.
   // TODO figure out where we create product groups...it's probably somewhere on the discount endpoint but not using the discount class.
@@ -24,7 +25,7 @@ class Discount extends Endpoint {
 
   protected $query = "SELECT * FROM discounts WHERE id = :id";
   protected $get_query_string = "SELECT * FROM discounts WHERE id = :id";
-  protected $post_query_string = "UPDATE `discounts` SET(
+  protected $put_query_string = "UPDATE `discounts` SET(
     `name` = :name,
     `group1` = :group1,
     `group2` = :group2,
@@ -39,8 +40,7 @@ class Discount extends Endpoint {
     `automatic` = :automatic,
     `active` = :active
   ) WHERE `id` = :id ";
-  protected $put_query_string = "INSERT INTO `discounts`(
-    `id`,
+  protected $post_query_string = "INSERT INTO `discounts`(
     `name`,
     `group1`,
     `group2`,
@@ -55,7 +55,6 @@ class Discount extends Endpoint {
     `automatic`,
     `active`
   ) VALUES (
-    :id,
     :name,
     :group1,
     :group2,
@@ -77,12 +76,18 @@ class Discount extends Endpoint {
   public function __construct($data = array()) {
     // this constructor is for creating new discounts.
     // call like $discount = new Discount();
-    $this->retrieveDiscountData($data['id']);
-    if (count($data)) {
+    if (is_array($data)) {
+      if (isset($data['id'])) { // it's a put request. Otherwise it's post, and we have no id.
+        $id = $data['id'];
+        $this->retrieveDiscountData($id);
+      }
       $this->set($data);
+    } else {
+      $id = $data;
+      $this->retrieveDiscountData($id);
     }
 
-    $this->execute; // TODO remember to implement execute in each endpoint.
+    $this->execute(); // execute is in each endpoint
   }
 
   public static function init($id, $target) {
@@ -109,17 +114,10 @@ class Discount extends Endpoint {
     if (is_null($id)) {
       $id = $this->id;
     }
-    $query = new Query($this->query, array('id'=>$id));
+    $query = new Query($this->get_query_string, array('id'=>$id));
     return $query->results;
   }
 
-
-  public function validate() {
-
-  }
-  public function compute() {
-
-  }
   public function execute() {
 
   }
